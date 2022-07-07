@@ -4,8 +4,6 @@ import os
 import bisect
 from lib.utils.geometry_utils import *
 
-H36M_TO_J17 = [6, 5, 4, 1, 2, 3, 16, 15, 14, 11, 12, 13, 8, 10, 0, 7, 9]
-J17_TO_J14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 
 H36M_IMG_SHAPE=1000
 

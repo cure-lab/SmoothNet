@@ -95,7 +95,6 @@ class JHMDBDataset(BaseDataset):
         print('#############################################################')
 
         if self.return_type == '2D':
-            self.input_dimension = cfg.DATASET.JHMDB.KEYPOINT_NUM * 2
             self.ground_truth_data_imgname = ground_truth_data["imgname"]
             self.ground_truth_data_joints_2d = ground_truth_data["joints_2d"]
             self.ground_truth_data_imgshape = ground_truth_data["imgshape"]
@@ -103,7 +102,8 @@ class JHMDBDataset(BaseDataset):
 
             self.detected_data_imgname = detected_data["imgname"]
             self.detected_data_joints_2d = detected_data["joints_2d"]
-
+            self.input_dimension = ground_truth_data["joints_2d"][0].shape[1]
+            
     def __len__(self):
         if self.phase == "train":
             return self.frame_num
@@ -133,8 +133,8 @@ class JHMDBDataset(BaseDataset):
             pred_data = self.detected_data_joints_2d[position].reshape(
                 ground_truth_data_len, -1)
             gt_imgshape = self.ground_truth_data_imgshape[position]
-            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[:2]
-            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[:2]
+            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]
+            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]
             gt_data = gt_data.reshape(-1, self.input_dimension)
             pred_data = pred_data.reshape(-1, self.input_dimension)
 
@@ -183,8 +183,8 @@ class JHMDBDataset(BaseDataset):
             pred_data = self.detected_data_joints_2d[index].reshape(
                 ground_truth_data_len, -1)
             gt_imgshape = self.ground_truth_data_imgshape[index]
-            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[:2]
-            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[:2]
+            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]
+            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]
             gt_data = gt_data.reshape(-1, self.input_dimension)
             pred_data = pred_data.reshape(-1, self.input_dimension)
             gt_bbox = self.ground_truth_data_bbox[index]

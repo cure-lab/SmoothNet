@@ -1,8 +1,12 @@
+import imp
 import torch
 import numpy as np
 from lib.models.smpl import SMPL
 from lib.utils.geometry_utils import *
 from lib.utils.utils import slide_window_to_sequence
+from lib.models.gaus1d_filter import GAUS1DFilter
+from lib.models.oneeuro_filter import ONEEUROFilter
+from lib.models.savgol_filer import SAVGOLFilter
 
 def batch_compute_similarity_transform_torch(S1, S2):
     '''
@@ -132,8 +136,8 @@ def calculate_jhmdb_PCK(predicted, gt, bbox, imgshape, thresh):
     Point_to_use = torch.ones((len(orderJHMDB))).to(gt.device)
 
     
-    test_gt = gt.reshape(-1, len(orderJHMDB), 2) * imgshape[0, :2]
-    test_out = predicted.reshape(-1, len(orderJHMDB), 2) * imgshape[0, :2]
+    test_gt = gt.reshape(-1, len(orderJHMDB), 2) * imgshape[0, [1,0]]
+    test_out = predicted.reshape(-1, len(orderJHMDB), 2) * imgshape[0, [1,0]]
 
     seqError = torch.zeros(N, len(orderJHMDB)).to(gt.device)
     seqThresh = torch.zeros(N, len(orderJHMDB)).to(gt.device)
@@ -177,6 +181,14 @@ def evaluate_smoothnet_2D(model,
         denoise_pampjpe = torch.empty((0)).to(device)
         denoise_accel = torch.empty((0)).to(device)
 
+        if cfg.EVALUATE.TRADITION !="":
+            filter_mpjpe = torch.empty((0)).to(device)
+            filter_pampjpe = torch.empty((0)).to(device)
+            filter_accel = torch.empty((0)).to(device)
+
+            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
+
+
         for i, data in enumerate(test_dataloader):
             data_pred = data["pred"].to(device).squeeze(0)
             data_gt = data["gt"].to(device).squeeze(0)
@@ -197,9 +209,13 @@ def evaluate_smoothnet_2D(model,
 
             H36M_IMG_SHAPE=1000
 
+            if cfg.EVALUATE.TRADITION !="":
+                filter_pos=filter(data_pred.reshape(frame_num, -1, 2))
+
             denoised_pos=denoised_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
             data_pred=data_pred.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
             data_gt=data_gt.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
+            filter_pos=filter_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
 
             input_mpjpe = torch.cat(
                 (input_mpjpe, calculate_mpjpe(data_pred, data_gt)), dim=0)
@@ -216,6 +232,14 @@ def evaluate_smoothnet_2D(model,
             denoise_accel = torch.cat(
                 (denoise_accel, calculate_accel_error(denoised_pos, data_gt)), dim=0)
 
+            if cfg.EVALUATE.TRADITION !="":
+                filter_mpjpe = torch.cat(
+                    (filter_mpjpe, calculate_mpjpe(filter_pos, data_gt)), dim=0)
+                filter_pampjpe = torch.cat(
+                    (filter_pampjpe, calculate_pampjpe(filter_pos, data_gt)), dim=0)
+                filter_accel = torch.cat(
+                    (filter_accel, calculate_accel_error(filter_pos, data_gt)), dim=0)
+
 
         _,mpjpe_top10_index=torch.sort(input_mpjpe)
         mpjpe_top10_index=mpjpe_top10_index[int(len(mpjpe_top10_index)*0.9):]
@@ -224,25 +248,36 @@ def evaluate_smoothnet_2D(model,
         input_accel_top10=input_accel[mpjpe_top10_index]
         denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
         denoise_accel_top10=denoise_accel[mpjpe_top10_index]
-
-        eval_dict = {
-                "input_mpjpe": input_mpjpe.mean() ,
-                "output_mpjpe": denoise_mpjpe.mean() ,
-                "improvement_mpjpe": denoise_mpjpe.mean()  - input_mpjpe.mean() ,
-                "input_pampjpe": input_pampjpe.mean() ,
-                "output_pampjpe": denoise_pampjpe.mean() ,
-                "improvement_pampjpe":
-                denoise_pampjpe.mean()- input_pampjpe.mean(),
-                "input_accel": input_accel.mean(),
-                "output_accel": denoise_accel.mean(),
-                "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
-                "input_top10%_mpjpe":input_mpjpe_top10.mean() ,
-                "output_top10%_mpjpe":denoise_mpjpe_top10.mean(),
-                "improvement_top10%_mpjpe":denoise_mpjpe_top10.mean() -input_mpjpe_top10.mean() ,
-                "input_top10%_accel":input_accel_top10.mean() ,
-                "output_top10%_accel":denoise_accel_top10.mean() ,
-                "improvement_top10%_accel":denoise_accel_top10.mean() -input_accel_top10.mean() ,
-            }
+        
+        if cfg.EVALUATE.TRADITION !="":
+            eval_dict = {
+                    "input_mpjpe": input_mpjpe.mean() ,
+                    "output_mpjpe": denoise_mpjpe.mean() ,
+                    "improvement_mpjpe": denoise_mpjpe.mean()  - input_mpjpe.mean() ,
+                    "filter_mpjpe": filter_mpjpe.mean()  ,
+                    "input_pampjpe": input_pampjpe.mean() ,
+                    "output_pampjpe": denoise_pampjpe.mean() ,
+                    "improvement_pampjpe":
+                    denoise_pampjpe.mean()- input_pampjpe.mean(),
+                    "filter_pampjpe": filter_pampjpe.mean()  ,
+                    "input_accel": input_accel.mean(),
+                    "output_accel": denoise_accel.mean(),
+                    "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
+                    "filter_accel": filter_accel.mean()  ,
+                }
+        else:
+            eval_dict = {
+                    "input_mpjpe": input_mpjpe.mean() ,
+                    "output_mpjpe": denoise_mpjpe.mean() ,
+                    "improvement_mpjpe": denoise_mpjpe.mean()  - input_mpjpe.mean() ,
+                    "input_pampjpe": input_pampjpe.mean() ,
+                    "output_pampjpe": denoise_pampjpe.mean() ,
+                    "improvement_pampjpe":
+                    denoise_pampjpe.mean()- input_pampjpe.mean(),
+                    "input_accel": input_accel.mean(),
+                    "output_accel": denoise_accel.mean(),
+                    "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
+                }
         
         return eval_dict
 
@@ -258,6 +293,13 @@ def evaluate_smoothnet_2D(model,
         denoise_pck_005 = torch.empty((keypoint_number, 0)).to(device)
         denoise_pck_01 = torch.empty((keypoint_number, 0)).to(device)
         denoise_pck_02 = torch.empty((keypoint_number, 0)).to(device)
+
+        if cfg.EVALUATE.TRADITION !="":
+            filter_pck_005 = torch.empty((keypoint_number, 0)).to(device)
+            filter_pck_01 = torch.empty((keypoint_number, 0)).to(device)
+            filter_pck_02 = torch.empty((keypoint_number, 0)).to(device)
+
+            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
 
         # calculate each sequence error
         for i, data in enumerate(test_dataloader):
@@ -278,7 +320,10 @@ def evaluate_smoothnet_2D(model,
             data_pred = slide_window_to_sequence(data_pred,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE).reshape(-1, keypoint_number, 2)
             data_gt = slide_window_to_sequence(data_gt,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE).reshape(-1, keypoint_number, 2)
             data_bbox = slide_window_to_sequence(data_bbox,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE).type(torch.int32)
-        
+            
+            if cfg.EVALUATE.TRADITION !="":
+                filter_pos=filter(data_pred)
+
             # input pck
             input_pck_005 = torch.cat(
                 (input_pck_005,
@@ -323,6 +368,29 @@ def evaluate_smoothnet_2D(model,
                                          keypoint_number, 1)),
                 dim=1)
 
+            if cfg.EVALUATE.TRADITION !="":
+                filter_pck_005 = torch.cat(
+                (filter_pck_005,
+                 calculate_jhmdb_PCK(filter_pos, data_gt, data_bbox,
+                                     data_imgshape, 0.05).reshape(
+                                         keypoint_number, 1)),
+                dim=1)
+
+                filter_pck_01 = torch.cat(
+                    (filter_pck_01,
+                    calculate_jhmdb_PCK(filter_pos, data_gt, data_bbox,
+                                        data_imgshape, 0.1).reshape(
+                                            keypoint_number, 1)),
+                    dim=1)
+
+                filter_pck_02 = torch.cat(
+                    (filter_pck_02,
+                    calculate_jhmdb_PCK(filter_pos, data_gt, data_bbox,
+                                        data_imgshape, 0.2).reshape(
+                                            keypoint_number, 1)),
+                    dim=1)
+
+
         def print_detail(pck, show_detail=None):
             if show_detail is not None:
                 print(show_detail)
@@ -348,17 +416,33 @@ def evaluate_smoothnet_2D(model,
                 print_detail(input_pck_02, "INPUT PCK 0.2")
                 print_detail(denoise_pck_02, "OUTPUT PCK 0.2")
 
-        eval_dict = {
-                "input_pck_005": input_pck_005.mean(),
-                "output_pck_005": denoise_pck_005.mean(),
-                "improvement_pck_005": denoise_pck_005.mean() - input_pck_005.mean(),
-                "input_pck_01": input_pck_01.mean(),
-                "output_pck_01": denoise_pck_01.mean(),
-                "improvement_pck_01": denoise_pck_01.mean() - input_pck_01.mean(),
-                "input_pck_02": input_pck_02.mean(),
-                "output_pck_02": denoise_pck_02.mean(),
-                "improvement_pck_02": denoise_pck_02.mean() - input_pck_02.mean(),
-            }
+        if cfg.EVALUATE.TRADITION !="":
+                eval_dict = {
+                    "input_pck_005": input_pck_005.mean(),
+                    "output_pck_005": denoise_pck_005.mean(),
+                    "improvement_pck_005": denoise_pck_005.mean() - input_pck_005.mean(),
+                    "filter_pck_005":filter_pck_005.mean(),
+                    "input_pck_01": input_pck_01.mean(),
+                    "output_pck_01": denoise_pck_01.mean(),
+                    "improvement_pck_01": denoise_pck_01.mean() - input_pck_01.mean(),
+                    "filter_pck_01":filter_pck_01.mean(),
+                    "input_pck_02": input_pck_02.mean(),
+                    "output_pck_02": denoise_pck_02.mean(),
+                    "improvement_pck_02": denoise_pck_02.mean() - input_pck_02.mean(),
+                    "filter_pck_02":filter_pck_02.mean(),
+                }
+        else:
+            eval_dict = {
+                    "input_pck_005": input_pck_005.mean(),
+                    "output_pck_005": denoise_pck_005.mean(),
+                    "improvement_pck_005": denoise_pck_005.mean() - input_pck_005.mean(),
+                    "input_pck_01": input_pck_01.mean(),
+                    "output_pck_01": denoise_pck_01.mean(),
+                    "improvement_pck_01": denoise_pck_01.mean() - input_pck_01.mean(),
+                    "input_pck_02": input_pck_02.mean(),
+                    "output_pck_02": denoise_pck_02.mean(),
+                    "improvement_pck_02": denoise_pck_02.mean() - input_pck_02.mean(),
+                }
             
         return eval_dict
 
@@ -373,6 +457,13 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
     denoise_mpjpe = torch.empty((0)).to(device)
     denoise_pampjpe = torch.empty((0)).to(device)
     denoise_accel = torch.empty((0)).to(device)
+
+    if cfg.EVALUATE.TRADITION !="":
+        filter_mpjpe = torch.empty((0)).to(device)
+        filter_pampjpe = torch.empty((0)).to(device)
+        filter_accel = torch.empty((0)).to(device)
+
+        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
 
     for i, data in enumerate(test_dataloader):
         data_pred = data["pred"].to(device).squeeze(0)
@@ -406,6 +497,10 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
             data_gt = data_gt - data_gt[:, keypoint_root, :].mean(
                 axis=1).reshape(-1, 1, 3)
 
+
+        if cfg.EVALUATE.TRADITION !="":
+            filter_pos=filter(data_pred)
+        
         input_mpjpe = torch.cat(
             (input_mpjpe, calculate_mpjpe(data_pred, data_gt)), dim=0)
         input_pampjpe = torch.cat(
@@ -421,6 +516,14 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
         denoise_accel = torch.cat(
             (denoise_accel, calculate_accel_error(denoised_pos, data_gt)), dim=0)
 
+        if cfg.EVALUATE.TRADITION !="":
+            filter_mpjpe = torch.cat(
+                (filter_mpjpe, calculate_mpjpe(filter_pos, data_gt)), dim=0)
+            filter_pampjpe = torch.cat(
+                (filter_pampjpe, calculate_pampjpe(filter_pos, data_gt)), dim=0)
+            filter_accel = torch.cat(
+                (filter_accel, calculate_accel_error(filter_pos, data_gt)), dim=0)
+
     
     _,mpjpe_top_index=torch.sort(input_mpjpe)
     mpjpe_top10_index=mpjpe_top_index[int(len(mpjpe_top_index)*0.9):]
@@ -432,24 +535,36 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
 
     m2mm = 1000
 
-    eval_dict = {
-            "input_mpjpe": input_mpjpe.mean() * m2mm,
-            "output_mpjpe": denoise_mpjpe.mean() * m2mm,
-            "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
-            "input_pampjpe": input_pampjpe.mean() * m2mm,
-            "output_pampjpe": denoise_pampjpe.mean() * m2mm,
-            "improvement_pampjpe":
-            denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
-            "input_accel": input_accel.mean() * m2mm,
-            "output_accel": denoise_accel.mean() * m2mm,
-            "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
-            "input_top10%_mpjpe":input_mpjpe_top10.mean() * m2mm,
-            "output_top10%_mpjpe":denoise_mpjpe_top10.mean() * m2mm,
-            "improvement_top10%_mpjpe":denoise_mpjpe_top10.mean() * m2mm-input_mpjpe_top10.mean() * m2mm,
-            "input_top10%_accel":input_accel_top10.mean() * m2mm,
-            "output_top10%_accel":denoise_accel_top10.mean() * m2mm,
-            "improvement_top10%_accel":denoise_accel_top10.mean() * m2mm-input_accel_top10.mean() * m2mm,
-        }
+
+    if cfg.EVALUATE.TRADITION !="":
+        eval_dict = {
+                "input_mpjpe": input_mpjpe.mean() * m2mm,
+                "output_mpjpe": denoise_mpjpe.mean() * m2mm,
+                "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
+                "filter_mpjpe":filter_mpjpe.mean()*m2mm,
+                "input_pampjpe": input_pampjpe.mean() * m2mm,
+                "output_pampjpe": denoise_pampjpe.mean() * m2mm,
+                "improvement_pampjpe":
+                denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
+                "filter_pampjpe":filter_pampjpe.mean()*m2mm,
+                "input_accel": input_accel.mean() * m2mm,
+                "output_accel": denoise_accel.mean() * m2mm,
+                "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
+                "filter_accel":filter_accel.mean()*m2mm
+            }
+    else:
+         eval_dict = {
+                "input_mpjpe": input_mpjpe.mean() * m2mm,
+                "output_mpjpe": denoise_mpjpe.mean() * m2mm,
+                "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
+                "input_pampjpe": input_pampjpe.mean() * m2mm,
+                "output_pampjpe": denoise_pampjpe.mean() * m2mm,
+                "improvement_pampjpe":
+                denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
+                "input_accel": input_accel.mean() * m2mm,
+                "output_accel": denoise_accel.mean() * m2mm,
+                "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
+            }
         
         
     return eval_dict
@@ -471,6 +586,14 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
     denoise_pampjpe = torch.empty((0)).to(device)
     denoise_mpvpe = torch.empty((0)).to(device)
     denoise_accel = torch.empty((0)).to(device)
+
+    if cfg.EVALUATE.TRADITION !="":
+        filter_mpjpe = torch.empty((0)).to(device)
+        filter_pampjpe = torch.empty((0)).to(device)
+        filter_mpvpe = torch.empty((0)).to(device)
+        filter_accel = torch.empty((0)).to(device)
+
+        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
 
 
     for i, data in enumerate(test_dataloader):
@@ -509,6 +632,9 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
         else:
             data_gt_trans=slide_window_to_sequence(data_gt_trans,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
             data_gt_scaling=slide_window_to_sequence(data_gt_scaling,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
+
+        if cfg.EVALUATE.TRADITION !="":
+            filter_pos=filter(data_pred_pose.reshape(-1,24,3))
          
         
         if cfg.TRAIN.USE_6D_SMPL:
@@ -518,6 +644,8 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 -1, 6)).reshape(-1, 24 * 3)
             data_pred_pose = rot6D_to_axis(
                 data_pred_pose.reshape(-1, 6)).reshape(-1, 24 * 3)
+            filter_pos = rot6D_to_axis(
+                filter_pos.reshape(-1, 6)).reshape(-1, 24 * 3)
             
 
         with torch.no_grad():
@@ -547,12 +675,20 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 betas=data_pred_shape.to(torch.float32),
             )
 
+            filter_smpl_result = smpl.forward(
+                global_orient=filter_pos[:, 0:3].to(torch.float32),
+                body_pose=filter_pos[:, 3:].to(torch.float32),
+                betas=data_pred_shape.to(torch.float32),
+            )
+
         input_smpl_result_joints = input_smpl_result.joints[:,
                                                             SMPL_TO_J14, :]
         gt_smpl_result_joints = gt_smpl_result.joints[:, SMPL_TO_J14, :]
         
         denoise_smpl_result_joints = denoise_smpl_result.joints[:,
                                                             SMPL_TO_J14, :]
+        filter_smpl_result_joints = filter_smpl_result.joints[:,
+                                                            SMPL_TO_J14, :]                                          
         
         if cfg.EVALUATE.ROOT_RELATIVE:
             input_smpl_result_joints = input_smpl_result_joints - input_smpl_result_joints[:, keypoint_root, :].mean(
@@ -560,6 +696,8 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
             gt_smpl_result_joints = gt_smpl_result_joints - gt_smpl_result_joints[:, keypoint_root, :].mean(
                 axis=1).reshape(-1, 1, 3)
             denoise_smpl_result_joints = denoise_smpl_result_joints - denoise_smpl_result_joints[:, keypoint_root, :].mean(
+                axis=1).reshape(-1, 1, 3)
+            filter_smpl_result_joints = filter_smpl_result_joints - filter_smpl_result_joints[:, keypoint_root, :].mean(
                 axis=1).reshape(-1, 1, 3)
 
         input_mpjpe = torch.cat((input_mpjpe,
@@ -602,6 +740,26 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                                     gt_smpl_result_joints)),
             dim=0)
 
+        if cfg.EVALUATE.TRADITION !="":
+            filter_mpjpe = torch.cat((filter_mpjpe,
+                                    calculate_mpjpe(filter_smpl_result_joints,
+                                                    gt_smpl_result_joints)),
+                                    dim=0)
+            filter_pampjpe = torch.cat(
+                (filter_pampjpe,
+                    calculate_pampjpe(filter_smpl_result_joints,
+                                    gt_smpl_result_joints)),
+                dim=0)
+            filter_mpvpe = torch.cat((filter_mpvpe,
+                                    calculate_mpjpe(filter_smpl_result.vertices,
+                                                    gt_smpl_result.vertices)),
+                                    dim=0)
+            filter_accel = torch.cat(
+                (filter_accel,
+                    calculate_accel_error(filter_smpl_result_joints,
+                                        gt_smpl_result_joints)),
+                dim=0)
+
     m2mm = 1000
 
     _,mpjpe_top10_index=torch.sort(input_mpjpe)
@@ -612,26 +770,41 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
     denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
     denoise_accel_top10=denoise_accel[mpjpe_top10_index]
 
-    eval_dict = {
-            "input_mpjpe": input_mpjpe.mean() * m2mm,
-            "output_mpjpe": denoise_mpjpe.mean() * m2mm,
-            "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
-            "input_pampjpe": input_pampjpe.mean() * m2mm,
-            "output_pampjpe": denoise_pampjpe.mean() * m2mm,
-            "improvement_pampjpe":
-            denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
-            "input_accel": input_accel.mean() * m2mm,
-            "output_accel": denoise_accel.mean() * m2mm,
-            "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
-            "input_mpvpe": input_mpvpe.mean() * m2mm,
-            "output_mpvpe": denoise_mpvpe.mean() * m2mm,
-            "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
-             "input_top10%_mpjpe":input_mpjpe_top10.mean() * m2mm,
-            "output_top10%_mpjpe":denoise_mpjpe_top10.mean() * m2mm,
-            "improvement_top10%_mpjpe":denoise_mpjpe_top10.mean() * m2mm-input_mpjpe_top10.mean() * m2mm,
-            "input_top10%_accel":input_accel_top10.mean() * m2mm,
-            "output_top10%_accel":denoise_accel_top10.mean() * m2mm,
-            "improvement_top10%_accel":denoise_accel_top10.mean() * m2mm-input_accel_top10.mean() * m2mm,
-        }
+    if cfg.EVALUATE.TRADITION !="":
+        eval_dict = {
+                "input_mpjpe": input_mpjpe.mean() * m2mm,
+                "output_mpjpe": denoise_mpjpe.mean() * m2mm,
+                "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
+                "filter_mpjpe":filter_mpjpe.mean()*m2mm,
+                "input_pampjpe": input_pampjpe.mean() * m2mm,
+                "output_pampjpe": denoise_pampjpe.mean() * m2mm,
+                "improvement_pampjpe":
+                denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
+                "filter_pampjpe":filter_pampjpe.mean()*m2mm,
+                "input_accel": input_accel.mean() * m2mm,
+                "output_accel": denoise_accel.mean() * m2mm,
+                "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
+                "filter_accel":filter_accel.mean()*m2mm,
+                "input_mpvpe": input_mpvpe.mean() * m2mm,
+                "output_mpvpe": denoise_mpvpe.mean() * m2mm,
+                "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
+                "filter_mpvpe":filter_mpvpe.mean()*m2mm,
+            }
+    else:
+        eval_dict = {
+                "input_mpjpe": input_mpjpe.mean() * m2mm,
+                "output_mpjpe": denoise_mpjpe.mean() * m2mm,
+                "improvement_mpjpe": denoise_mpjpe.mean() * m2mm - input_mpjpe.mean() * m2mm,
+                "input_pampjpe": input_pampjpe.mean() * m2mm,
+                "output_pampjpe": denoise_pampjpe.mean() * m2mm,
+                "improvement_pampjpe":
+                denoise_pampjpe.mean() * m2mm - input_pampjpe.mean() * m2mm,
+                "input_accel": input_accel.mean() * m2mm,
+                "output_accel": denoise_accel.mean() * m2mm,
+                "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
+                "input_mpvpe": input_mpvpe.mean() * m2mm,
+                "output_mpvpe": denoise_mpvpe.mean() * m2mm,
+                "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
+            }
 
     return eval_dict

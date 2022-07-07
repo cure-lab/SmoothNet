@@ -87,6 +87,10 @@ cfg.LOSS.W_POS = 1.0  # loss w position
 cfg.LOG = CN()
 cfg.LOG.NAME = ''  # log name
 
+# visualization config
+cfg.VIS=CN()
+cfg.VIS.START=0
+cfg.VIS.END=100
 
 def get_cfg_defaults():
     """Get yacs CfgNode object with default values"""
@@ -119,10 +123,13 @@ def parse_args():
     parser.add_argument('--slide_window_size',
                         type=int,
                         help='slide window size')
-    parser.add_argument('--tradition',
+    parser.add_argument('--visualize_video_id',
+                        type=int,
+                        help="visualize video sequence id")
+    parser.add_argument('--output_video_path',
                         type=str,
-                        default="",
-                        help='traditional filters [savgol,oneeuro,gaus1d]')
+                        help="visualize video output path")
+
 
     args = parser.parse_args()
     print(args, end='\n\n')
@@ -139,6 +146,8 @@ def parse_args():
     cfg.MODEL.SLIDE_WINDOW_SIZE=args.slide_window_size
 
     cfg.EVALUATE.PRETRAINED = args.checkpoint
-    cfg.EVALUATE.TRADITION = args.tradition
+
+    cfg.VIS.INPUT_VIDEO_NUMBER=args.visualize_video_id
+    cfg.VIS.OUTPUT_VIDEO_PATH=args.output_video_path
 
     return cfg, cfg_file

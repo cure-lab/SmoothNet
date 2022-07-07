@@ -40,7 +40,7 @@ SmoothNet has been implemented and tested on Pytorch 1.10.1 with python >= 3.6. 
 
 Clone the repo:
 ```bash
-git clone ??
+git clone https://github.com/cure-lab/SmoothNet.git
 ```
 
 We recommend you prepare the environment using `conda`:

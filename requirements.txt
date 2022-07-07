@@ -6,3 +6,8 @@ smplx==0.1.28
 thop==0.0.31.post2005241907
 scipy==1.5.4
 chumpy==0.70
+opencv-python==4.6.0.66
+tqdm==4.64.0
+matplotlib==3.3.4
+trimesh==3.12.7
+pyrender==0.1.45

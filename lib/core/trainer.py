@@ -227,6 +227,9 @@ class Trainer():  # merge
             present_representation= all_body_representation[dataset_index]
             present_dataset=all_dataset[dataset_index]
             present_estimator=all_estimator[dataset_index]
+            print("=======================================================")
+            print("evaluate on dataset: "+present_dataset+", estimator: "+present_estimator+", body representation: "+present_representation)
+            
             if present_representation == "3D":
                 performance.append(self.evaluate_3d(dataset_index,present_dataset,present_estimator))
 

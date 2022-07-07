@@ -9,6 +9,6 @@ conda activate $CONDA_ENV_NAME
 which python
 which pip
 
-conda install pytorch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1 cudatoolkit=10.2 -c pytorch
+conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch -c nvidia
 
 pip install -r requirements.txt
