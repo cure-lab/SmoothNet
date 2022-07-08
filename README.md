@@ -1,19 +1,16 @@
- # SmoothNet: A Plug-and-Play Network for Refining Human Poses in Videos
+ # SmoothNet: A Plug-and-Play Network for Refining Human Poses in Videos (ECCV 2022)
 
 This repo is the official implementation of "**SmoothNet: A Plug-and-Play Network for Refining Human Poses in Videos**". 
 [[Paper]](https://arxiv.org/abs/2112.13715)  [[Project]](https://ailingzeng.site/smoothnet)
 
 ## Update
-- [x] Support SmoothNet in [MMPose](https://github.com/open-mmlab/mmpose) [Release v0.25.0](https://github.com/open-mmlab/mmpose/releases/tag/v0.25.0) as a smoothing strategy!
+- [x] Support SmoothNet in [MMPose](https://github.com/open-mmlab/mmpose) [Release v0.25.0](https://github.com/open-mmlab/mmpose/releases/tag/v0.25.0) and [MMHuman3D](https://github.com/open-mmlab/mmhuman3d) as a smoothing strategy!
 
 - [x] Clean version is released! 
 It currently includes **code, data, log and models** for the following tasks: 
 -  2D human pose estimation
 - 3D human pose estimation
 - Body recovery via a SMPL model
-
-## TODO
-- [ ] Support SmoothNet in [MMHuman3D](https://github.com/open-mmlab/mmhuman3d)
 
 
 ## Description
