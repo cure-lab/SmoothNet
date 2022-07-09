@@ -299,7 +299,7 @@ def evaluate_smoothnet_2D(model,
             filter_pck_01 = torch.empty((keypoint_number, 0)).to(device)
             filter_pck_02 = torch.empty((keypoint_number, 0)).to(device)
 
-            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
+            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter(cfg)")
 
         # calculate each sequence error
         for i, data in enumerate(test_dataloader):
