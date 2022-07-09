@@ -15,8 +15,9 @@ It currently includes **code, data, log and models** for the following tasks:
 
 ## Description
 
-When analyzing human motion videos, the output jitters from existing pose estimators are highly-unbalanced. Most frames only suffer from slight jitters, while significant jitters occur in those frames with occlusion or poor image quality. Such complex poses often persist in videos, leading to consecutive frames with poor estimation results and large jitters. Existing pose smoothing solutions based on temporal convolutional networks, recurrent neural networks, or low-pass filters cannot deal with such a long-term jitter problem without considering the significant and persistent errors within the jittering video segment. Motivated by the above observation, we propose a novel plug-and-play refinement network, namely SMOOTHNET, which can be attached to any existing pose estimators to improve its temporal smoothness and enhance its per-frame precision simultaneously. Especially, SMOOTHNET is a simple yet effective data-driven fully-connected network with large receptive fields, effectively mitigating the impact of long-term jitters with unreliable estimation results. We conduct extensive experiments on twelve backbone networks with seven datasets across 2D and 3D pose estimation, body recovery, and downstream tasks. Our results demonstrate that the proposed SMOOTHNET consistently outperforms existing solutions, especially on those clips with high errors and long-term jitters.
+When analyzing human motion videos, the output jitters from existing pose estimators are highly-unbalanced with varied estimation errors across frames. Most frames in a video are relatively easy to estimate and only suffer from slight jitters. In contrast, for rarely seen or occluded actions, the estimated positions of multiple joints largely deviate from the ground truth values for a consecutive sequence of frames, rendering significant jitters on them. 
 
+To tackle this problem, we propose to attach a dedicated **temporal-only** refinement network to existing pose estimators for jitter mitigation, named SmoothNet. Unlike existing learning-based solutions that employ spatio-temporal models to co-optimize per-frame precision and temporal smoothness at all the joints, SmoothNet models the natural smoothness characteristics in body movements by learning the long-range temporal relations of every joint without considering the noisy correlations among joints. With a simple yet effective motion-aware fully-connected network, SmoothNet improves the temporal smoothness of existing pose estimators significantly and enhances the estimation accuracy of those challenging frames as a side-effect. Moreover, as a temporal-only model, a unique advantage of SmoothNet is its strong transferability across various types of estimators and datasets. Comprehensive experiments on **five datasets** with **eleven popular backbone networks** across **2D and 3D pose estimation and body recovery tasks** demonstrate the efficacy of the proposed solution.
 ### Major Features
 
 - Model training and evaluation for **2D pose, 3D pose, and SMPL body representation**
@@ -25,7 +26,59 @@ When analyzing human motion videos, the output jitters from existing pose estima
 
 ## Results
 
+### 3D Keypoint Results
 
+
+
+| Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
+| ------- | --------- | ------------------ | ------------------ | ------------ |
+| AIST++    | SPIN      | 107.17/95.21            | 33.19/4.17           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| AIST++   | TCMR       | 106.72/105.51            | 6.4/4.24           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
+| AIST++    | VIBE       | 106.90/97.47            | 31.64/4.15          | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
+| Human3.6M    | FCN       |  54.55/52.72        | 19.17/1.03       |   [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | RLE       |  48.87/48.27              | 7.75/0.90          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | TCMR       |  73.57/73.89              | 3.77/2.79          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | VIBE       |  78.10/77.23              | 15.81/2.86          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=27)       |  50.13/50.04             | 3.53/0.88          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=81)       |  48.97/48.89             | 3.06/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=243)       |  48.11/48.05             | 2.82/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| MPI-INF-3DHP    | SPIN       |  100.74/92.89             | 28.54/6.54          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| MPI-INF-3DHP    | TCMR       |  92.83/88.93             | 7.92/6.49          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| MPI-INF-3DHP    | VIBE       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| MuPoTS    | TposeNet      | 103.33/100.78            | 12.7/7.23           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| MuPoTS    | TposeNet+RefineNet      | 93.97/91.78            | 9.53/7.21           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| 3DPW    | EFT       |  81.60/79.48             | 29.03/5.44          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | PARE      |  71.80/71.11             | 22.77/5.31          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | SPIN      |  87.58/86.67             | 30.84/5.53          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | TCMR      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW    | VIB      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+
+### 2D Keypoint Results
+
+
+
+| Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
+| ------- | --------- | ------------------ | ------------------ | ------------ |
+| Human3.6M   | CPN      | 6.67/6.45            | 2.91/0.14           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | Hourglass      | 9.42/9.25            | 1.54/0.15           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | HRNet      | 4.59/4.54            | 1.01/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | RLE      | 5.14/5.11            | 0.9/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+
+
+
+### SMPL Results
+
+
+| Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
+| ------- | --------- | ------------------ | ------------------ | ------------ |
+| AIST++   | SPIN      | 107.72/103.00            | 33.21/5.72           |[checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| AIST++   | TCMR      | 106.95/106.39            | 6.47/4.68           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++   | VIBE      | 107.41/102.06            | 31.65/5.95           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | EFT      | 91.60/89.57            | 33.38/7.89           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | PARE      | 79.93/78.68            | 26.45/6.31           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | SPIN      | 99.28/97.81            | 34.95/7.40           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | TCMR      | 88.46/88.37            | 7.12/6.52           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | VIBE      | 84.27/83.14            | 23.59/7.24           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 
 
 
@@ -50,9 +103,9 @@ source scripts/install_conda.sh
 
 All the data used in our experiment can be downloaded here. 
 
-[Google Drive](https://drive.google.com/drive/folders/1e5wEPWFNldihU5mBUpTOuQaGjgIxujrt?usp=sharing)
+[Google Drive](https://drive.google.com/drive/folders/19Cu-_gqylFZAOTmHXzK52C80DKb0Tfx_?usp=sharing)
 
-[Baidu Netdisk](https://pan.baidu.com/s/1ZBgQDJElkObHBhLsWtmkQw?pwd=cqcw)
+[Baidu Netdisk](https://pan.baidu.com/s/1J6EV4uwThcn-W_GNuc4ZPw?pwd=eb5x)
 
 The sructure of the repository should look like this:
 
@@ -83,6 +136,39 @@ The sructure of the repository should look like this:
 |-- requirements.txt
 ```
 
+If you want to add your own dataset, please follow these steps (noted that this is also how the provided data is organized):
+
+1. Organize your data into corresponding type according to the body representation. The file structure is shown as follows:
+
+    ```
+    |-- [your dataset]\_[estimator]\_[2D/3D/smpl]
+        |-- detected
+            |-- [your dataset]\_[estimator]\_[2D/3D/smpl]_test.npz
+            |-- [your dataset]\_[estimator]\_[2D/3D/smpl]_train.npz
+        |-- groundtruth
+            |-- [your dataset]\_gt\_[2D/3D/smpl]_test.npz
+            |-- [your dataset]\_gt\_[2D/3D/smpl]_train.npz
+    ```
+    It is fine if you only have training or testing data. The content in each .npz file is consist of "imgname" and "human poses", which is related to the body representation you use.
+    
+    - 3D keypoints: 
+
+        - imgname: Strings containing the image and sequence name with format [sequence_name]/[image_name](string "" if the sequence_name and image_name not available). 
+        - keypoints_3d: 3D joint position. The shape of each sequence is corresponding_sequence_length*(keypoints_number*3). The order of it is the same with imgname
+
+    - 2D keypoints
+
+        - imgname: Strings containing the image and sequence name with format [sequence_name]/[image_name](string "" if the sequence_name and image_name not available). 
+        - keypoints_2d: 2D joint position. The shape of each sequence is corresponding_sequence_length*(keypoints_number*2). The order of it is the same with imgname
+
+    - SMPL
+
+        - imgname: Strings containing the image and sequence name with format [sequence_name]/[image_name](string "" if the sequence_name and image_name not available). 
+        - pose: pose parameters. The shape of each sequence is corresponding_sequence_length*72. The order of it is the same with imgname
+        - shape: shape parameters. The shape of each sequence is corresponding_sequence_length*10. The order of it is the same with imgname
+ 
+2. If you use 3D keypoints as the body representation, add the root of all keypoints ``cfg.DATASET.ROOT_[your dataset]_[estimator]_3D`` in [evaluate_config.py](lib/core/evaluate_config.py), [train_config.py](lib/core/train_config.py) or [visualize_config.py](lib/core/visualize_config.py) according to your purpose(test, train or visualize).
+3. Construct your own dataset following [the existing dataset files](lib/dataset). You might need to modify the detailed implementation depending on your data characteristics.
 
 ### Training
 
@@ -98,7 +184,7 @@ For example, you can train on 3D representation of Human3.6M using backbone esti
 python train.py --cfg configs/h36m_fcn_3D.yaml --dataset_name h36m --estimator fcn --body_representation 3D --slide_window_size 8
 ```
 
-You can easily train on multiple datasets using "," split multiple datasets / estimator / body representation. For example, you can train on `AIST++` - `VIBE` - `3D` and `3DPW` - `SPIN` - `3D` with silde window size 8 by:
+You can easily train on multiple datasets using "," to split multiple datasets / estimator / body representation. For example, you can train on `AIST++` - `VIBE` - `3D` and `3DPW` - `SPIN` - `3D` with silde window size 8 by:
 
 ```shell script
 python train.py --cfg configs/h36m_fcn_3D.yaml --dataset_name aist,pw3d --estimator vibe,spin --body_representation 3D,3D  --slide_window_size 8
@@ -122,6 +208,20 @@ python train.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw
 
 Note that the pretrained checkpoints and testing datasets should be downloaded and prepared before evaluation.
 
+### Visualization
+
+
+un the commands below to start evaluation:
+
+```shell script
+python eval_smoothnet.py --cfg [config file] --checkpoint [pretrained checkpoint] --dataset_name [dataset name] --estimator [backbone estimator you use] --body_representation [smpl/3D/2D] --slide_window_size [slide window size]
+```
+
+For example, you can visualize `3DPW` - `SPIN` - `3D` using SmoothNet trained on `3DPW` - `SPIN` - `3D` with silde window size 32 by:
+
+```shell script
+python train.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw3d_spin_3D/checkpoints_8.pth.tar --dataset_name pw3d --estimator spin --body_representation 3D --slide_window_size 32
+```
 
 ## Citing SmoothNet
 
