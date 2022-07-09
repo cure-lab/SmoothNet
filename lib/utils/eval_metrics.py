@@ -186,7 +186,7 @@ def evaluate_smoothnet_2D(model,
             filter_pampjpe = torch.empty((0)).to(device)
             filter_accel = torch.empty((0)).to(device)
 
-            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
+            filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter(cfg)")
 
 
         for i, data in enumerate(test_dataloader):
@@ -463,7 +463,7 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
         filter_pampjpe = torch.empty((0)).to(device)
         filter_accel = torch.empty((0)).to(device)
 
-        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
+        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter(cfg)")
 
     for i, data in enumerate(test_dataloader):
         data_pred = data["pred"].to(device).squeeze(0)
@@ -593,7 +593,7 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
         filter_mpvpe = torch.empty((0)).to(device)
         filter_accel = torch.empty((0)).to(device)
 
-        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter()")
+        filter=eval(cfg.EVALUATE.TRADITION.upper()+"Filter(cfg)")
 
 
     for i, data in enumerate(test_dataloader):

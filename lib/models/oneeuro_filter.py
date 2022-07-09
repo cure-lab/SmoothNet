@@ -68,11 +68,11 @@ class ONEEUROFilter:
         np.ndarray: smoothed poses
     """
 
-    def __init__(self, min_cutoff=0.004, beta=0.7):
+    def __init__(self, cfg):
         super(ONEEUROFilter, self).__init__()
 
-        self.min_cutoff = min_cutoff
-        self.beta = beta
+        self.min_cutoff = cfg.EVALUATE.TRADITION_ONEEURO.MIN_CUTOFF
+        self.beta = cfg.EVALUATE.TRADITION_ONEEURO.BETA
 
     def __call__(self, x=None):
         # x (np.ndarray): input poses.

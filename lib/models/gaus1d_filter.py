@@ -19,11 +19,11 @@ class GAUS1DFilter:
         np.ndarray: Smoothed poses
     """
 
-    def __init__(self, window_size=11, sigma=4):
+    def __init__(self, cfg):
         super(GAUS1DFilter, self).__init__()
 
-        self.window_size = window_size
-        self.sigma = sigma
+        self.window_size = cfg.EVALUATE.TRADITION_GAUS1D.WINDOW_SIZE
+        self.sigma = cfg.EVALUATE.TRADITION_GAUS1D.SIGMA
 
     def __call__(self, x=None):
         if self.window_size % 2 == 0:

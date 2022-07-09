@@ -22,12 +22,12 @@ class SAVGOLFilter:
         smoothed poses (np.ndarray, torch.tensor)
     """
 
-    def __init__(self, window_size=11, polyorder=2):
+    def __init__(self, cfg):
         super(SAVGOLFilter, self).__init__()
 
         # 1-D Savitzky-Golay filter
-        self.window_size = window_size
-        self.polyorder = polyorder
+        self.window_size = cfg.EVALUATE.TRADITION_SAVGOL.WINDOW_SIZE
+        self.polyorder = cfg.EVALUATE.TRADITION_SAVGOL.POLYORDER
 
     def __call__(self, x=None):
         # x.shape: [t,k,c]
