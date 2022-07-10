@@ -90,7 +90,7 @@ cfg.LOG.NAME = ''  # log name
 # visualization config
 cfg.VIS=CN()
 cfg.VIS.START=0
-cfg.VIS.END=100
+cfg.VIS.END=1000
 
 def get_cfg_defaults():
     """Get yacs CfgNode object with default values"""

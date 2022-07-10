@@ -198,139 +198,126 @@ def visualize_smpl(vis_output_video_path,
 # it properly in Linux, so we recommend you use the function above. Users who run this code in Windows 
 # can try functions below. You might need to modify some lines of code to fit different datasets
 
-# from lib.utils.render import Renderer
+from lib.utils.render import Renderer
 
-# from PIL import ImageFont
-# from PIL import Image
-# from PIL import ImageDraw
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
 
-# FONT_HEIGHT = 200
-# FONT_SIZE = 95
-# FRAME_RATE = 30
-# COLOR_GRAY = [230, 230, 230]
-# FONT_ORI = "(a) Video"
-# FONT_GT = "(b) Ground Truth"
-# FONT_IN = "(c) Estimator"
-# FONT_DECIWATCH = "(d) Ours"
+FONT_HEIGHT = 200
+FONT_SIZE = 95
+FRAME_RATE = 30
+COLOR_GRAY = [230, 230, 230]
+FONT_ORI = "(a) Video"
+FONT_GT = "(b) Ground Truth"
+FONT_IN = "(c) Estimator"
+FONT_DECIWATCH = "(d) Ours"
 
 
-# def visualize_smpl(data_imgname,
-#                         vis_output_video_path,
-#                         vis_output_video_name,
-#                         smpl_neural,
-#                         in_poses,
-#                         gt_poses,
-#                         smoothnet_poses,
-#                         start_frame,
-#                         end_frame):
-#     video_base_path = os.path.dirname(data_imgname[0])
-#     print(f"You are visualizing the result of {video_base_path} ...")
+def visualize_smpl_detailed(
+                        vis_output_video_path,
+                        vis_output_video_name,
+                        smpl_neural,
+                        in_poses,
+                        gt_poses,
+                        smoothnet_poses,
+                        start_frame,
+                        end_frame):
+    print("Visualizing the result ...")
 
-#     with torch.no_grad():
-#         in_smpl = smpl_neural(
-#             body_pose=torch.from_numpy(in_poses[:, 3:]).float(),
-#             global_orient=torch.from_numpy(in_poses[:, 0:3]).float())
+    with torch.no_grad():
+        in_smpl = smpl_neural(
+            body_pose=torch.from_numpy(in_poses[:, 3:]).float(),
+            global_orient=torch.from_numpy(in_poses[:, 0:3]).float())
 
-#         gt_smpl = smpl_neural(
-#             body_pose=torch.from_numpy(gt_poses[:, 3:]).float(),
-#             global_orient=torch.from_numpy(gt_poses[:, 0:3]).float())
+        gt_smpl = smpl_neural(
+            body_pose=torch.from_numpy(gt_poses[:, 3:]).float(),
+            global_orient=torch.from_numpy(gt_poses[:, 0:3]).float())
 
-#         smoothnet_smpl = smpl_neural(
-#             body_pose=torch.from_numpy(smoothnet_poses[:, 3:]).float(),
-#             global_orient=torch.from_numpy(smoothnet_poses[:, 0:3]).float())
+        smoothnet_smpl = smpl_neural(
+            body_pose=torch.from_numpy(smoothnet_poses[:, 3:]).float(),
+            global_orient=torch.from_numpy(smoothnet_poses[:, 0:3]).float())
 
-#     imgsize_h, imgsize_w = cv2.imread(data_imgname[0]).shape[:2]
+    imgsize_h, imgsize_w = 1000,1000
 
-#     videoWriter = cv2.VideoWriter(
-#         os.path.join(vis_output_video_path, vis_output_video_name),
-#         cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE,
-#         (imgsize_w * 5, imgsize_h + FONT_HEIGHT))
+    videoWriter = cv2.VideoWriter(
+        os.path.join(vis_output_video_path, vis_output_video_name),
+        cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE,
+        (imgsize_w * 5, imgsize_h + FONT_HEIGHT))
 
-#     if not os.path.exists(vis_output_video_path):
-#         os.makedirs(vis_output_video_path)
+    if not os.path.exists(vis_output_video_path):
+        os.makedirs(vis_output_video_path)
 
-#     for frame_i in trange(max(0, start_frame), min(len(data_imgname),
-#                                                    end_frame)):
-#         oriimg = cv2.imread(data_imgname[frame_i])
-#         gt_image = np.zeros((imgsize_h, imgsize_w, 3))
-#         in_image = np.zeros((imgsize_h, imgsize_w, 3))
-#         smoothnet_image = np.zeros((imgsize_h, imgsize_w, 3))
-#         render = Renderer(smpl_neural.faces,
-#                           resolution=(imgsize_w, imgsize_h),
-#                           orig_img=True,
-#                           wireframe=False)
+    for frame_i in trange(max(0, start_frame), min(in_smpl.joints.shape[0],
+                                                   end_frame)):
+        gt_image = np.zeros((imgsize_h, imgsize_w, 3))
+        in_image = np.zeros((imgsize_h, imgsize_w, 3))
+        smoothnet_image = np.zeros((imgsize_h, imgsize_w, 3))
+        render = Renderer(smpl_neural.faces,
+                          resolution=(imgsize_w, imgsize_h),
+                          orig_img=True,
+                          wireframe=False)
 
-#         gt_rendered_img = render.render(
-#             gt_image,
-#             gt_smpl.vertices.numpy()[frame_i],
-#             [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
-#             color=np.array(COLOR_GRAY) / 255)
-#         in_rendered_img = render.render(
-#             in_image,
-#             in_smpl.vertices.numpy()[frame_i],
-#             [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
-#             color=np.array(COLOR_GRAY) / 255)
-#         smoothnet_rendered_img = render.render(
-#             smoothnet_image,
-#             smoothnet_smpl.vertices.numpy()[frame_i],
-#             [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
-#             color=np.array(COLOR_GRAY) / 255)
+        gt_rendered_img = render.render(
+            gt_image,
+            gt_smpl.vertices.numpy()[frame_i],
+            [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
+            color=np.array(COLOR_GRAY) / 255)
+        in_rendered_img = render.render(
+            in_image,
+            in_smpl.vertices.numpy()[frame_i],
+            [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
+            color=np.array(COLOR_GRAY) / 255)
+        smoothnet_rendered_img = render.render(
+            smoothnet_image,
+            smoothnet_smpl.vertices.numpy()[frame_i],
+            [imgsize_h * 0.001 * 0.6, imgsize_w * 0.001 * 0.6, 0.1, 0.2],
+            color=np.array(COLOR_GRAY) / 255)
 
-#         oriimg = np.concatenate((oriimg, np.zeros(
-#             (FONT_HEIGHT, imgsize_w, 3))),
-#                                 axis=0)
-#         gt_rendered_img = np.concatenate(
-#             (gt_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))), axis=0)
-#         in_rendered_img = np.concatenate(
-#             (in_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))), axis=0)
-#         smoothnet_rendered_img = np.concatenate(
-#             (smoothnet_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))),
-#             axis=0)
+        gt_rendered_img = np.concatenate(
+            (gt_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))), axis=0)
+        in_rendered_img = np.concatenate(
+            (in_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))), axis=0)
+        smoothnet_rendered_img = np.concatenate(
+            (smoothnet_rendered_img, np.zeros((FONT_HEIGHT, imgsize_w, 3))),
+            axis=0)
 
-#         #font = ImageFont.truetype('simhei',size=FONT_SIZE)
-#         font = ImageFont.truetype('DejaVuSansCondensed-Bold', size=FONT_SIZE)
+        # font = ImageFont.truetype('simhei',size=FONT_SIZE)
+        font = ImageFont.truetype('DejaVuSansCondensed-Bold', size=FONT_SIZE)
 
-#         img_ori = Image.fromarray(oriimg.astype(np.uint8))
-#         img_gt = Image.fromarray(gt_rendered_img.astype(np.uint8))
-#         img_in = Image.fromarray(in_rendered_img.astype(np.uint8))
-#         img_smoothnet = Image.fromarray(smoothnet_rendered_img.astype(
-#             np.uint8))
+        img_gt = Image.fromarray(gt_rendered_img.astype(np.uint8))
+        img_in = Image.fromarray(in_rendered_img.astype(np.uint8))
+        img_smoothnet = Image.fromarray(smoothnet_rendered_img.astype(
+            np.uint8))
 
-#         draw_ori = ImageDraw.Draw(img_ori)
-#         draw_ori.text(((imgsize_w - len(FONT_ORI) * FONT_SIZE / 2) / 2,
-#                        imgsize_h + FONT_HEIGHT / 4),
-#                       FONT_ORI, (255, 255, 255),
-#                       font=font)
-#         oriimg = np.array(img_ori)
+        draw_gt = ImageDraw.Draw(img_gt)
+        draw_gt.text(((imgsize_w - len(FONT_GT) * FONT_SIZE / 2) / 2,
+                      imgsize_h + FONT_HEIGHT / 4),
+                     FONT_GT, (255, 255, 255),
+                     font=font)
+        gt_rendered_img = np.array(img_gt)
 
-#         draw_gt = ImageDraw.Draw(img_gt)
-#         draw_gt.text(((imgsize_w - len(FONT_GT) * FONT_SIZE / 2) / 2,
-#                       imgsize_h + FONT_HEIGHT / 4),
-#                      FONT_GT, (255, 255, 255),
-#                      font=font)
-#         gt_rendered_img = np.array(img_gt)
+        draw_in = ImageDraw.Draw(img_in)
+        draw_in.text(((imgsize_w - len(FONT_IN) * FONT_SIZE / 2) / 2,
+                      imgsize_h + FONT_HEIGHT / 4),
+                     FONT_IN, (255, 255, 255),
+                     font=font)
+        in_rendered_img = np.array(img_in)
 
-#         draw_in = ImageDraw.Draw(img_in)
-#         draw_in.text(((imgsize_w - len(FONT_IN) * FONT_SIZE / 2) / 2,
-#                       imgsize_h + FONT_HEIGHT / 4),
-#                      FONT_IN, (255, 255, 255),
-#                      font=font)
-#         in_rendered_img = np.array(img_in)
+        draw_detected = ImageDraw.Draw(img_smoothnet)
+        draw_detected.text(
+            ((imgsize_w - len(FONT_DECIWATCH) * FONT_SIZE / 2) / 2,
+             imgsize_h + FONT_HEIGHT / 4),
+            FONT_DECIWATCH, (255, 255, 255),
+            font=font)
+        detected_rendered_img = np.array(img_smoothnet)
+        output_img = np.concatenate(
+            (gt_rendered_img, in_rendered_img,
+             detected_rendered_img),
+            axis=1)
 
-#         draw_detected = ImageDraw.Draw(img_smoothnet)
-#         draw_detected.text(
-#             ((imgsize_w - len(FONT_DECIWATCH) * FONT_SIZE / 2) / 2,
-#              imgsize_h + FONT_HEIGHT / 4),
-#             FONT_DECIWATCH, (255, 255, 255),
-#             font=font)
-#         detected_rendered_img = np.array(img_smoothnet)
-#         output_img = np.concatenate(
-#             (oriimg, gt_rendered_img, in_rendered_img,
-#              detected_rendered_img),
-#             axis=1)
+        videoWriter.write(output_img)
 
-#         videoWriter.write(output_img)
-
-#     videoWriter.release()
-#     print(f"Finish! The video is stored in "+os.path.join(vis_output_video_path, vis_output_video_name))
+    videoWriter.release()
+    print(f"Finish! The video is stored in "+os.path.join(vis_output_video_path, vis_output_video_name))
 
