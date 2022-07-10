@@ -133,8 +133,8 @@ class JHMDBDataset(BaseDataset):
             pred_data = self.detected_data_joints_2d[position].reshape(
                 ground_truth_data_len, -1)
             gt_imgshape = self.ground_truth_data_imgshape[position]
-            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]
-            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]
+            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]-0.5
+            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]-0.5
             gt_data = gt_data.reshape(-1, self.input_dimension)
             pred_data = pred_data.reshape(-1, self.input_dimension)
 
@@ -183,8 +183,8 @@ class JHMDBDataset(BaseDataset):
             pred_data = self.detected_data_joints_2d[index].reshape(
                 ground_truth_data_len, -1)
             gt_imgshape = self.ground_truth_data_imgshape[index]
-            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]
-            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]
+            gt_data = gt_data.reshape(-1, 2) / gt_imgshape[[1,0]]-0.5
+            pred_data = pred_data.reshape(-1, 2) / gt_imgshape[[1,0]]-0.5
             gt_data = gt_data.reshape(-1, self.input_dimension)
             pred_data = pred_data.reshape(-1, self.input_dimension)
             gt_bbox = self.ground_truth_data_bbox[index]

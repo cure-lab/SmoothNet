@@ -204,7 +204,7 @@ class Visualize():
         len_seq = data_gt.shape[0]
         data_pred=data_pred[:len_seq,:]
         if self.dataset_name=="jhmdb":
-            data_pred_norm=torch.tensor(data_pred.reshape(-1,2)/data_imageshape).to(self.device).reshape_as(data_gt)
+            data_pred_norm=torch.tensor(data_pred.reshape(-1,2)/data_imageshape-0.5).to(self.device).reshape_as(data_gt)
         elif self.dataset_name=="h36m":
             data_pred_norm =(torch.tensor(data_pred).to(self.device)-data_imageshape/2)/(data_imageshape/2) # normalization
 
@@ -231,7 +231,7 @@ class Visualize():
         data_pred = data_pred[:data_len, :].reshape(-1, keypoint_number, 2)
         data_gt = data_gt[:data_len, :].reshape(-1, keypoint_number, 2)
         if self.dataset_name=="jhmdb":
-            predicted_pos = predicted_pos.reshape(-1, keypoint_number, 2)*torch.tensor(data_imageshape).to(predicted_pos.device)
+            predicted_pos = (predicted_pos.reshape(-1, keypoint_number, 2)+0.5)*torch.tensor(data_imageshape).to(predicted_pos.device)
         elif self.dataset_name=="h36m":
             predicted_pos = predicted_pos.reshape(-1, keypoint_number, 2)*torch.tensor(data_imageshape/2).to(predicted_pos.device)+torch.tensor(data_imageshape/2)
 

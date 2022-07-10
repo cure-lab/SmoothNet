@@ -136,8 +136,8 @@ def calculate_jhmdb_PCK(predicted, gt, bbox, imgshape, thresh):
     Point_to_use = torch.ones((len(orderJHMDB))).to(gt.device)
 
     
-    test_gt = gt.reshape(-1, len(orderJHMDB), 2) * imgshape[0, [1,0]]
-    test_out = predicted.reshape(-1, len(orderJHMDB), 2) * imgshape[0, [1,0]]
+    test_gt = (gt.reshape(-1, len(orderJHMDB), 2)+0.5) * imgshape[0, [1,0]]
+    test_out = (predicted.reshape(-1, len(orderJHMDB), 2)+0.5) * imgshape[0, [1,0]]
 
     seqError = torch.zeros(N, len(orderJHMDB)).to(gt.device)
     seqThresh = torch.zeros(N, len(orderJHMDB)).to(gt.device)
