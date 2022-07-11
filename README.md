@@ -25,9 +25,13 @@ To tackle this problem, we propose to attach **a dedicated temporal-only refinem
 
 ## Results
 
+SmoothNet is a plug-and-play post-processing network to smooth any outputs of existing pose estimators. To fit well across datasets, backbones, and modalities with lower MPJPE and PA-MPJPE, we provide **THREE pre-trained models** (Train on [AIST-VIBE-3D](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar), [3DPW-SPIN-3D](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar), and [H36M-FCN-3D](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar)) to handle all existing issues. 
+
+Please refer to our supplementary materials to check the cross-model validation in detail. Noted that all models can obtain **lower and similar Accels** than the compared backbone estimators. The differences are in MPJPEs and PA-MPJPEs.
+
+**Due to the temporal-only network without spatial modelings, SmoothNet is trained on 3D position representations, and are tested on 2D, 3D, and 6D representations, respectively. **
+
 ### 3D Keypoint Results
-
-
 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
@@ -55,14 +59,12 @@ To tackle this problem, we propose to attach **a dedicated temporal-only refinem
 ### 2D Keypoint Results
 
 
-
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
 | Human3.6M   | CPN      | 6.67/6.45            | 2.91/0.14           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | Human3.6M   | Hourglass      | 9.42/9.25            | 1.54/0.15           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | Human3.6M   | HRNet      | 4.59/4.54            | 1.01/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | Human3.6M   | RLE      | 5.14/5.11            | 0.9/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-
 
 
 ### SMPL Results
@@ -226,12 +228,14 @@ python train.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw
 
 If you find this repository useful for your work, please consider citing it as follows:
 
-```bibtex
-@article{zeng2021smoothnet,
+```bibtex 
+@inproceedings{zeng2021smoothnet,
       title={SmoothNet: A Plug-and-Play Network for Refining Human Poses in Videos},
       author={Zeng, Ailing and Yang, Lei and Ju, Xuan and Li, Jiefeng and Wang, Jianyi and Xu, Qiang},
-      journal={arXiv preprint arXiv:2112.13715},
-      year={2021}}   
+      booktitle={European Conference on Computer Vision},
+      year={2022},
+      organization={Springer}
+}
 ```
 
 Please remember to cite all the datasets and backbone estimators if you use them in your experiments.
