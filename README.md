@@ -229,7 +229,7 @@ python train.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw
 If you find this repository useful for your work, please consider citing it as follows:
 
 ```bibtex 
-@inproceedings{zeng2021smoothnet,
+@inproceedings{zeng2022smoothnet,
       title={SmoothNet: A Plug-and-Play Network for Refining Human Poses in Videos},
       author={Zeng, Ailing and Yang, Lei and Ju, Xuan and Li, Jiefeng and Wang, Jianyi and Xu, Qiang},
       booktitle={European Conference on Computer Vision},
