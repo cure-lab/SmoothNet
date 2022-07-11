@@ -29,7 +29,7 @@ SmoothNet is a plug-and-play post-processing network to smooth any outputs of ex
 
 Please refer to our supplementary materials to check the cross-model validation in detail. Noted that all models can obtain **lower and similar Accels** than the compared backbone estimators. The differences are in MPJPEs and PA-MPJPEs.
 
-**Due to the temporal-only network without spatial modelings, SmoothNet is trained on 3D position representations, and are tested on 2D, 3D, and 6D representations, respectively. **
+**Due to the temporal-only network without spatial modelings, SmoothNet is trained on 3D position representations only, and can be tested on 2D, 3D, and 6D representations, respectively.**
 
 ### 3D Keypoint Results
 
