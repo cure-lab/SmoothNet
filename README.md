@@ -54,7 +54,7 @@ Please refer to our supplementary materials to check the cross-model validation 
 | 3DPW    | PARE      |  71.80/71.11             | 22.77/5.31          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW    | SPIN      |  87.58/86.67             | 30.84/5.53          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW    | TCMR      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW    | VIB      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW    | VIBE      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 
 ### 2D Keypoint Results
 
