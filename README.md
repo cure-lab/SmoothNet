@@ -211,6 +211,7 @@ Note that the pretrained checkpoints and testing datasets should be downloaded a
 
 ### Visualization
 
+Here, we only provide demo visualization based on offline processed detected poses of specific datasets(e.g. AIST++, Human3.6M, and 3DPW). To visualize on arbitrary given video, please refer to the [inference/demo](https://github.com/open-mmlab/mmhuman3d/blob/main/docs/getting_started.md) of [MMHuman3D](https://github.com/open-mmlab/mmhuman3d).
 
 un the commands below to start evaluation:
 
