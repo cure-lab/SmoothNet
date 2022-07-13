@@ -6,10 +6,7 @@ import torch
 from scipy.ndimage.filters import gaussian_filter1d
 
 class GAUS1DFilter:
-    """Applies median filter and then gaussian filter. code from:
-    https://github.com/akanazawa/human_dynamics/blob/mas
-    ter/src/util/smooth_bbox.py.
-
+    """
     Args:
         x (np.ndarray): input pose
         window_size (int, optional): for median filters (must be odd).
@@ -41,12 +38,18 @@ class GAUS1DFilter:
                 x = x.cpu().numpy()
             else:
                 x = x.numpy()
+        
+        T,K,C=x.shape
+        x=x.reshape(T,K*C)
 
-        smoothed = np.array(
-            [signal.medfilt(param, window_size) for param in x.T]).T
-        smooth_poses = np.array(
-            [gaussian_filter1d(traj, self.sigma) for traj in smoothed.T]).T
-
+        smooth_poses=np.empty((0,K*C))
+        for i in range(T//window_size):
+            smooth_poses=np.concatenate((smooth_poses,gaussian_filter1d(input=x[i*window_size:(i+1)*window_size,:],
+                                        sigma=self.sigma,
+                                        axis=0)),0)
+        smooth_poses=np.concatenate((smooth_poses,x[(T//window_size)*window_size:,:]),0)
+        smooth_poses=smooth_poses.reshape(T,K,C)
+            
         if isinstance(x_type, torch.Tensor):
             # we also return tensor by default
             if x_type.is_cuda:
