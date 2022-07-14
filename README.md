@@ -7,20 +7,24 @@ This repo is the official implementation of "**SmoothNet: A Plug-and-Play Networ
 - [x] Support SmoothNet in [MMPose](https://github.com/open-mmlab/mmpose) [Release v0.25.0](https://github.com/open-mmlab/mmpose/releases/tag/v0.25.0) and [MMHuman3D](https://github.com/open-mmlab/mmhuman3d) as a smoothing strategy!
 
 - [x] Clean version is released! 
+- [x] To further improve SmoothNet as a near online smoothing strategy, we reduce the original window size 64 to **32** frames by default! 
+- [x] We also provide the pretrained models with the window size 8, 16, 32 and 64 frames [here](https://drive.google.com/drive/folders/1AsOm10AReDKt4HSVAQ0MsZ1Fp-_18IV3?usp=sharing). 
+
 It currently includes **code, data, log and models** for the following tasks: 
--  2D human pose estimation
+- 2D human pose estimation
 - 3D human pose estimation
 - Body recovery via a SMPL model
 
-
-## Description
-
-When analyzing human motion videos, the output jitters from existing pose estimators are highly-unbalanced with varied estimation errors across frames. Most frames in a video are relatively easy to estimate and only suffer from slight jitters. In contrast, for rarely seen or occluded actions, the estimated positions of multiple joints largely deviate from the ground truth values for a consecutive sequence of frames, rendering significant jitters on them.
-To tackle this problem, we propose to attach **a dedicated temporal-only refinement network** to existing pose estimators for jitter mitigation, named SmoothNet. Unlike existing learning-based solutions that employ spatio-temporal models to co-optimize per-frame precision and temporal smoothness at all the joints, SmoothNet models the natural smoothness characteristics in body movements by learning the long-range temporal relations of every joint without considering the noisy correlations among joints. With a simple yet effective motion-aware fully-connected network, SmoothNet improves the temporal smoothness of existing pose estimators significantly and enhances the estimation accuracy of those challenging frames as a side-effect. Moreover, as a temporal-only model, a unique advantage of SmoothNet is its strong transferability across various types of estimators and datasets. Comprehensive experiments on five datasets with eleven popular backbone networks across 2D and 3D pose estimation and body recovery tasks demonstrate the efficacy of the proposed solution. Our code and datasets are provided in the supplementary materials.
 ### Major Features
 
 - Model training and evaluation for **2D pose, 3D pose, and SMPL body representation**
 - Supporting **6 popular datasets** ([AIST++](https://google.github.io/aistplusplus_dataset/factsfigures.html), [Human3.6M](http://vision.imar.ro/human3.6m/description.php), [Sub-JHMDB](http://jhmdb.is.tue.mpg.de/), [MPI-INF-3DHP](https://vcai.mpi-inf.mpg.de/3dhp-dataset/), [MuPoTS-3D](https://vcai.mpi-inf.mpg.de/projects/SingleShotMultiPerson/), [3DPW](https://virtualhumans.mpi-inf.mpg.de/3DPW/)) and providing cleaned estimation results of **13 popular pose estimation backbones**([SPIN](https://github.com/nkolot/SPIN), [TCMR](https://github.com/hongsukchoi/TCMR_RELEASE), [VIBE](https://github.com/mkocabas/VIBE), [CPN](https://github.com/chenyilun95/tf-cpn), [FCN](https://github.com/una-dinosauria/3d-pose-baseline), [Hourglass](http://www-personal.umich.edu/~alnewell/pose), [HRNet](https://github.com/leoxiaobin/deep-high-resolution-net.pytorch), [RLE](https://github.com/Jeff-sjtu/res-loglikelihood-regression), [VideoPose3D](https://github.com/facebookresearch/VideoPose3D), [TposeNet](https://github.com/vegesm/pose_refinement), [EFT](https://github.com/facebookresearch/eft), [PARE](https://pare.is.tue.mpg.de/), [SimplePose](https://github.com/microsoft/human-pose-estimation.pytorch))
+
+## Description
+
+When analyzing human motion videos, the output jitters from existing pose estimators are highly-unbalanced with varied estimation errors across frames. Most frames in a video are relatively easy to estimate and only suffer from slight jitters. In contrast, for rarely seen or occluded actions, the estimated positions of multiple joints largely deviate from the ground truth values for a consecutive sequence of frames, rendering significant jitters on them.
+
+To tackle this problem, we propose to attach **a dedicated temporal-only refinement network** to existing pose estimators for jitter mitigation, named SmoothNet. Unlike existing learning-based solutions that employ spatio-temporal models to co-optimize per-frame precision and temporal smoothness at all the joints, SmoothNet models the natural smoothness characteristics in body movements by learning the long-range temporal relations of every joint without considering the noisy correlations among joints. With a simple yet effective motion-aware fully-connected network, SmoothNet improves the temporal smoothness of existing pose estimators significantly and enhances the estimation accuracy of those challenging frames as a side-effect. Moreover, as a temporal-only model, a unique advantage of SmoothNet is its strong transferability across various types of estimators and datasets. Comprehensive experiments on five datasets with eleven popular backbone networks across 2D and 3D pose estimation and body recovery tasks demonstrate the efficacy of the proposed solution. Our code and datasets are provided in the supplementary materials.
 
 
 ## Results
@@ -36,25 +40,25 @@ Please refer to our supplementary materials to check the cross-model validation 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
 | AIST++    | SPIN      | 107.17/95.21            | 33.19/4.17           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| AIST++   | TCMR       | 106.72/105.51            | 6.4/4.24           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
-| AIST++    | VIBE       | 106.90/97.47            | 31.64/4.15          | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
+| AIST++   | TCMR*       | 106.72/105.51            | 6.4/4.24           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
+| AIST++    | VIBE*       | 106.90/97.47            | 31.64/4.15          | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
 | Human3.6M    | FCN       |  54.55/52.72        | 19.17/1.03       |   [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | Human3.6M    | RLE       |  48.87/48.27              | 7.75/0.90          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | TCMR       |  73.57/73.89              | 3.77/2.79          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | VIBE       |  78.10/77.23              | 15.81/2.86          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=27)       |  50.13/50.04             | 3.53/0.88          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=81)       |  48.97/48.89             | 3.06/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=243)       |  48.11/48.05             | 2.82/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | TCMR*       |  73.57/73.89              | 3.77/2.79          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | VIBE*       |  78.10/77.23              | 15.81/2.86          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=27)*       |  50.13/50.04             | 3.53/0.88          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=81)*       |  48.97/48.89             | 3.06/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=243)*       |  48.11/48.05             | 2.82/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | MPI-INF-3DHP    | SPIN       |  100.74/92.89             | 28.54/6.54          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MPI-INF-3DHP    | TCMR       |  92.83/88.93             | 7.92/6.49          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MPI-INF-3DHP    | VIBE       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MuPoTS    | TposeNet      | 103.33/100.78            | 12.7/7.23           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| MuPoTS    | TposeNet+RefineNet      | 93.97/91.78            | 9.53/7.21           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| MPI-INF-3DHP    | TCMR*       |  92.83/88.93             | 7.92/6.49          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| MPI-INF-3DHP    | VIBE*       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| MuPoTS    | TposeNet*      | 103.33/100.78            | 12.7/7.23           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
+| MuPoTS    | TposeNet+RefineNet*      | 93.97/91.78            | 9.53/7.21           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
 | 3DPW    | EFT       |  81.60/79.48             | 29.03/5.44          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW    | PARE      |  71.80/71.11             | 22.77/5.31          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW    | SPIN      |  87.58/86.67             | 30.84/5.53          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | TCMR      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW    | VIBE      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW    | TCMR*      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW    | VIBE*      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 
 ### 2D Keypoint Results
 
@@ -73,14 +77,17 @@ Please refer to our supplementary materials to check the cross-model validation 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
 | AIST++   | SPIN      | 107.72/103.00            | 33.21/5.72           |[checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| AIST++   | TCMR      | 106.95/106.39            | 6.47/4.68           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| AIST++   | VIBE      | 107.41/102.06            | 31.65/5.95           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++   | TCMR*      | 106.95/106.39            | 6.47/4.68           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++   | VIBE*      | 107.41/102.06            | 31.65/5.95           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | 3DPW   | EFT      | 91.60/89.57            | 33.38/7.89           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW   | PARE      | 79.93/78.68            | 26.45/6.31           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW   | SPIN      | 99.28/97.81            | 34.95/7.40           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW   | TCMR      | 88.46/88.37            | 7.12/6.52           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW   | VIBE      | 84.27/83.14            | 23.59/7.24           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | TCMR*      | 88.46/88.37            | 7.12/6.52           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | VIBE*      | 84.27/83.14            | 23.59/7.24           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 
+* \* means the used pose estimators are using temporal information. 
+* The usage of SmoothNet for better performance: a SOTA **single-frame** estimator (e.g., PARE) + SmoothNet
+* Since TCMR uses a sliding window method to smooth the poses, which causes over-smoothness issue, SmoothNet will be hard to further decrease the MPJPE, PA-MPJPE.
 
 
 ## Getting Started
