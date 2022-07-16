@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 import torch
+import time
 
 
 def smoothing_factor(t_e, cutoff):
@@ -98,11 +99,14 @@ class ONEEUROFilter:
         # initialize
         pred_pose_hat[0] = x[0]
 
+        start = time.time()
         for idx, pose in enumerate(x[1:]):
             idx += 1
             t = np.ones_like(pose) * idx
             pose = one_euro_filter(t, pose)
             pred_pose_hat[idx] = pose
+        end = time.time()
+        inference_time=end-start
 
         if isinstance(x_type, torch.Tensor):
             # we also return tensor by default
@@ -110,4 +114,4 @@ class ONEEUROFilter:
                 pred_pose_hat = torch.from_numpy(pred_pose_hat).cuda()
             else:
                 pred_pose_hat = torch.from_numpy(pred_pose_hat)
-        return pred_pose_hat
+        return pred_pose_hat,inference_time

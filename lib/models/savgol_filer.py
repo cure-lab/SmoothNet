@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import scipy.signal as signal
 import torch
-
+import time
 class SAVGOLFilter:
     """savgol_filter lib is from:
     https://docs.scipy.org/doc/scipy/reference/generated/
@@ -55,9 +55,12 @@ class SAVGOLFilter:
         smooth_poses = np.zeros_like(x)
         # smooth at different axis
         C = x.shape[-1]
+        start = time.time()
         for i in range(C):
             smooth_poses[..., i] = signal.savgol_filter(
                 x[..., i], window_size, polyorder, axis=0)
+        end = time.time()
+        inference_time=end-start
 
         if isinstance(x_type, torch.Tensor):
             # we also return tensor by default
@@ -65,4 +68,4 @@ class SAVGOLFilter:
                 smooth_poses = torch.from_numpy(smooth_poses).cuda()
             else:
                 smooth_poses = torch.from_numpy(smooth_poses)
-        return smooth_poses
+        return smooth_poses,inference_time

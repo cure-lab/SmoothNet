@@ -7,6 +7,7 @@ from lib.utils.utils import slide_window_to_sequence
 from lib.models.gaus1d_filter import GAUS1DFilter
 from lib.models.oneeuro_filter import ONEEUROFilter
 from lib.models.savgol_filer import SAVGOLFilter
+import time
 
 def batch_compute_similarity_transform_torch(S1, S2):
     '''
@@ -172,6 +173,9 @@ def evaluate_smoothnet_2D(model,
                           show_detail=True):
     keypoint_number = test_dataloader.dataset.input_dimension//2
 
+    inference_time={"smoothnet":0,
+                    "filter":0}
+
     if dataset =="h36m":
         input_mpjpe = torch.empty((0)).to(device)
         input_pampjpe = torch.empty((0)).to(device)
@@ -195,11 +199,12 @@ def evaluate_smoothnet_2D(model,
 
             with torch.no_grad():
                 data_pred=data_pred.permute(0,2,1)
+                start_time=time.time()
                 denoised_pos = model(
                     data_pred)
+                inference_time["smoothnet"]+=time.time()-start_time
                 data_pred=data_pred.permute(0,2,1)
                 denoised_pos=denoised_pos.permute(0,2,1)
-
 
             denoised_pos = slide_window_to_sequence(denoised_pos,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
             data_pred = slide_window_to_sequence(data_pred,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
@@ -210,7 +215,8 @@ def evaluate_smoothnet_2D(model,
             H36M_IMG_SHAPE=1000
 
             if cfg.EVALUATE.TRADITION !="":
-                filter_pos=filter(data_pred.reshape(frame_num, -1, 2))
+                filter_pos,filter_inference_time=filter(data_pred.reshape(frame_num, -1, 2))
+                inference_time["filter"]+=filter_inference_time
 
             denoised_pos=denoised_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
             data_pred=data_pred.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
@@ -248,6 +254,7 @@ def evaluate_smoothnet_2D(model,
         input_accel_top10=input_accel[mpjpe_top10_index]
         denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
         denoise_accel_top10=denoise_accel[mpjpe_top10_index]
+
         
         if cfg.EVALUATE.TRADITION !="":
             eval_dict = {
@@ -264,6 +271,12 @@ def evaluate_smoothnet_2D(model,
                     "output_accel": denoise_accel.mean(),
                     "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
                     "filter_accel": filter_accel.mean()  ,
+                    "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                    "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
+                    "input_mpjpe_top10":input_mpjpe_top10.mean(),
+                    "input_accel_top10":input_accel_top10.mean(),
+                    "denoise_mpjpe_top10":denoise_mpjpe_top10.mean(),
+                    "denoise_accel_top10":denoise_accel_top10.mean(),
                 }
         else:
             eval_dict = {
@@ -277,13 +290,17 @@ def evaluate_smoothnet_2D(model,
                     "input_accel": input_accel.mean(),
                     "output_accel": denoise_accel.mean(),
                     "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
+                    "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                    "input_mpjpe_top10":input_mpjpe_top10.mean(),
+                    "input_accel_top10":input_accel_top10.mean(),
+                    "denoise_mpjpe_top10":denoise_mpjpe_top10.mean(),
+                    "denoise_accel_top10":denoise_accel_top10.mean(),
                 }
         
         return eval_dict
 
     # evaluate on jhmdb
     elif dataset == "jhmdb":
-
         # original pck
         input_pck_005 = torch.empty((keypoint_number, 0)).to(device)
         input_pck_01 = torch.empty((keypoint_number, 0)).to(device)
@@ -311,7 +328,9 @@ def evaluate_smoothnet_2D(model,
             
             with torch.no_grad():
                 data_pred=data_pred.permute(0,2,1)
+                start_time=time.time()
                 denoised_pos = model(data_pred)
+                inference_time["smoothnet"]+=time.time()-start_time
                 data_pred=data_pred.permute(0,2,1)
                 denoised_pos=denoised_pos.permute(0,2,1)
 
@@ -322,7 +341,8 @@ def evaluate_smoothnet_2D(model,
             data_bbox = slide_window_to_sequence(data_bbox,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE).type(torch.int32)
             
             if cfg.EVALUATE.TRADITION !="":
-                filter_pos=filter(data_pred)
+                filter_pos,filter_inference_time=filter(data_pred)
+                inference_time["filter"]+=filter_inference_time
 
             # input pck
             input_pck_005 = torch.cat(
@@ -430,6 +450,8 @@ def evaluate_smoothnet_2D(model,
                     "output_pck_02": denoise_pck_02.mean(),
                     "improvement_pck_02": denoise_pck_02.mean() - input_pck_02.mean(),
                     "filter_pck_02":filter_pck_02.mean(),
+                    "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_pck_005.shape[0],
+                    "filter_inference_time":10e6*inference_time["filter"]/input_pck_005.shape[0],
                 }
         else:
             eval_dict = {
@@ -442,6 +464,7 @@ def evaluate_smoothnet_2D(model,
                     "input_pck_02": input_pck_02.mean(),
                     "output_pck_02": denoise_pck_02.mean(),
                     "improvement_pck_02": denoise_pck_02.mean() - input_pck_02.mean(),
+                    "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_pck_005.shape[0],
                 }
             
         return eval_dict
@@ -449,6 +472,9 @@ def evaluate_smoothnet_2D(model,
 
 def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator,cfg):
     keypoint_root=eval("cfg.DATASET.ROOT_"+dataset_name.upper()+"_"+estimator.upper()+"_3D")
+
+    inference_time={"smoothnet":0,
+                    "filter":0}
 
     input_mpjpe = torch.empty((0)).to(device)
     input_pampjpe = torch.empty((0)).to(device)
@@ -471,8 +497,10 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
 
         with torch.no_grad():
             data_pred=data_pred.permute(0,2,1)
+            start_time=time.time()
             denoised_pos = model(
                 data_pred)
+            inference_time["smoothnet"]+=time.time()-start_time
             data_pred=data_pred.permute(0,2,1)
             denoised_pos=denoised_pos.permute(0,2,1)
 
@@ -499,7 +527,8 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
 
 
         if cfg.EVALUATE.TRADITION !="":
-            filter_pos=filter(data_pred)
+            filter_pos,filter_inference_time=filter(data_pred)
+            inference_time["filter"]+=filter_inference_time
         
         input_mpjpe = torch.cat(
             (input_mpjpe, calculate_mpjpe(data_pred, data_gt)), dim=0)
@@ -527,7 +556,7 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
     
     _,mpjpe_top_index=torch.sort(input_mpjpe)
     mpjpe_top10_index=mpjpe_top_index[int(len(mpjpe_top_index)*0.9):]
-
+    
     input_mpjpe_top10=input_mpjpe[mpjpe_top10_index]
     input_accel_top10=input_accel[mpjpe_top10_index]
     denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
@@ -550,7 +579,13 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
                 "input_accel": input_accel.mean() * m2mm,
                 "output_accel": denoise_accel.mean() * m2mm,
                 "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
-                "filter_accel":filter_accel.mean()*m2mm
+                "filter_accel":filter_accel.mean()*m2mm,
+                "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
+                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
+                "input_accel_top10":input_accel_top10.mean()*m2mm,
+                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
+                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
             }
     else:
          eval_dict = {
@@ -564,6 +599,11 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
                 "input_accel": input_accel.mean() * m2mm,
                 "output_accel": denoise_accel.mean() * m2mm,
                 "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
+                "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
+                "input_accel_top10":input_accel_top10.mean()*m2mm,
+                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
+                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
             }
         
         
@@ -573,6 +613,9 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
 def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
     SMPL_TO_J14 = [11, 10, 9, 12, 13, 14, 4, 3, 2, 5, 6, 7, 1, 38]
     keypoint_root = [2, 3]
+
+    inference_time={"smoothnet":0,
+                    "filter":0}
 
     smpl = SMPL(model_path=cfg.SMPL_MODEL_DIR, gender="neutral",
                 batch_size=1).to(device)
@@ -618,7 +661,9 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
 
         with torch.no_grad():
             data_pred_pose=data_pred_pose.permute(0,2,1)
+            start_time=time.time()
             denoised_pos = model(data_pred_pose)
+            inference_time["smoothnet"]+=time.time()-start_time
             data_pred_pose=data_pred_pose.permute(0,2,1)
             denoised_pos=denoised_pos.permute(0,2,1)
 
@@ -634,7 +679,8 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
             data_gt_scaling=slide_window_to_sequence(data_gt_scaling,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
 
         if cfg.EVALUATE.TRADITION !="":
-            filter_pos=filter(data_pred_pose.reshape(-1,24,3))
+            filter_pos,filter_inference_time=filter(data_pred_pose.reshape(-1,24,3))
+            inference_time["filter"]+=filter_inference_time
          
         
         if cfg.TRAIN.USE_6D_SMPL:
@@ -789,6 +835,12 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 "output_mpvpe": denoise_mpvpe.mean() * m2mm,
                 "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
                 "filter_mpvpe":filter_mpvpe.mean()*m2mm,
+                "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
+                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
+                "input_accel_top10":input_accel_top10.mean()*m2mm,
+                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
+                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
             }
     else:
         eval_dict = {
@@ -805,6 +857,11 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 "input_mpvpe": input_mpvpe.mean() * m2mm,
                 "output_mpvpe": denoise_mpvpe.mean() * m2mm,
                 "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
+                "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
+                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
+                "input_accel_top10":input_accel_top10.mean()*m2mm,
+                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
+                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
             }
 
     return eval_dict
