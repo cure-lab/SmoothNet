@@ -4,7 +4,8 @@ import os
 import bisect
 from lib.utils.geometry_utils import *
 
-
+H36M_TO_J17 = [6, 5, 4, 1, 2, 3, 16, 15, 14, 11, 12, 13, 8, 10, 0, 7, 9]
+J17_TO_J14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 class PW3DDataset(BaseDataset):
 
     def __init__(self, cfg, estimator='spin', return_type='3D', phase='train'):
@@ -153,6 +154,10 @@ class PW3DDataset(BaseDataset):
             pred_data = self.detected_data_joints_3d[position].reshape(
                 ground_truth_data_len, -1, 3)
 
+            if self.estimator in ["eft","spin","pare"]:
+                gt_data=gt_data[:, H36M_TO_J17, :][:, J17_TO_J14, :]
+                pred_data=pred_data[:, H36M_TO_J17, :][:, J17_TO_J14, :]
+
             gt_data = gt_data.reshape(ground_truth_data_len, -1)
             pred_data = pred_data.reshape(ground_truth_data_len, -1)
 
@@ -207,6 +212,11 @@ class PW3DDataset(BaseDataset):
                 ground_truth_data_len, -1, 3)
             pred_data = self.detected_data_joints_3d[index].reshape(
                 ground_truth_data_len, -1, 3)
+
+            if self.estimator in ["eft","spin","pare"]:
+                gt_data=gt_data[:, H36M_TO_J17, :][:, J17_TO_J14, :]
+                pred_data=pred_data[:, H36M_TO_J17, :][:, J17_TO_J14, :]
+
 
             gt_data = gt_data.reshape(ground_truth_data_len, -1)
             pred_data = pred_data.reshape(ground_truth_data_len, -1)

@@ -54,9 +54,10 @@ Please refer to our supplementary materials to check the cross-model validation 
 | MPI-INF-3DHP    | VIBE*       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | MuPoTS    | TposeNet*      | 103.33/100.78            | 12.7/7.23           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
 | MuPoTS    | TposeNet+RefineNet*      | 93.97/91.78            | 9.53/7.21           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| 3DPW    | EFT       |  81.60/79.48             | 29.03/5.44          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | PARE      |  71.80/71.11             | 22.77/5.31          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | SPIN      |  87.58/86.67             | 30.84/5.53          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | EFT       |  90.32/88.40             | 32.71/6.07          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | EFT       |  90.32/86.39             | 32.71/6.30          |  [checkpoint](data/checkpoints/pw3d_eft_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)(additional training)|
+| 3DPW    | PARE      |  78.91/78.11             | 25.64/5.91          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | SPIN      |  96.85/95.84             | 34.55/6.17          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
 | 3DPW    | TCMR*      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 | 3DPW    | VIBE*      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
 
