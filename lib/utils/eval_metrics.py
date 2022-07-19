@@ -247,13 +247,13 @@ def evaluate_smoothnet_2D(model,
                     (filter_accel, calculate_accel_error(filter_pos, data_gt)), dim=0)
 
 
-        _,mpjpe_top10_index=torch.sort(input_mpjpe)
-        mpjpe_top10_index=mpjpe_top10_index[int(len(mpjpe_top10_index)*0.9):]
+        _,mpjpe_top1_index=torch.sort(input_mpjpe)
+        mpjpe_top1_index=mpjpe_top1_index[int(len(mpjpe_top1_index)*0.99):]
 
-        input_mpjpe_top10=input_mpjpe[mpjpe_top10_index]
-        input_accel_top10=input_accel[mpjpe_top10_index]
-        denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
-        denoise_accel_top10=denoise_accel[mpjpe_top10_index]
+        input_mpjpe_top1=input_mpjpe[mpjpe_top1_index]
+        input_accel_top1=input_accel[mpjpe_top1_index]
+        denoise_mpjpe_top1=denoise_mpjpe[mpjpe_top1_index]
+        denoise_accel_top1=denoise_accel[mpjpe_top1_index]
 
         
         if cfg.EVALUATE.TRADITION !="":
@@ -273,10 +273,10 @@ def evaluate_smoothnet_2D(model,
                     "filter_accel": filter_accel.mean()  ,
                     "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
                     "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
-                    "input_mpjpe_top10":input_mpjpe_top10.mean(),
-                    "input_accel_top10":input_accel_top10.mean(),
-                    "denoise_mpjpe_top10":denoise_mpjpe_top10.mean(),
-                    "denoise_accel_top10":denoise_accel_top10.mean(),
+                    "input_mpjpe_top1":input_mpjpe_top1.mean(),
+                    "input_accel_top1":input_accel_top1.mean(),
+                    "denoise_mpjpe_top1":denoise_mpjpe_top1.mean(),
+                    "denoise_accel_top1":denoise_accel_top1.mean(),
                 }
         else:
             eval_dict = {
@@ -291,10 +291,10 @@ def evaluate_smoothnet_2D(model,
                     "output_accel": denoise_accel.mean(),
                     "improvement_accel": denoise_accel.mean() - input_accel.mean() ,
                     "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
-                    "input_mpjpe_top10":input_mpjpe_top10.mean(),
-                    "input_accel_top10":input_accel_top10.mean(),
-                    "denoise_mpjpe_top10":denoise_mpjpe_top10.mean(),
-                    "denoise_accel_top10":denoise_accel_top10.mean(),
+                    "input_mpjpe_top1":input_mpjpe_top1.mean(),
+                    "input_accel_top1":input_accel_top1.mean(),
+                    "denoise_mpjpe_top1":denoise_mpjpe_top1.mean(),
+                    "denoise_accel_top1":denoise_accel_top1.mean(),
                 }
         
         return eval_dict
@@ -555,12 +555,12 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
 
     
     _,mpjpe_top_index=torch.sort(input_mpjpe)
-    mpjpe_top10_index=mpjpe_top_index[int(len(mpjpe_top_index)*0.9):]
+    mpjpe_top1_index=mpjpe_top_index[int(len(mpjpe_top_index)*0.99):]
     
-    input_mpjpe_top10=input_mpjpe[mpjpe_top10_index]
-    input_accel_top10=input_accel[mpjpe_top10_index]
-    denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
-    denoise_accel_top10=denoise_accel[mpjpe_top10_index]
+    input_mpjpe_top1=input_mpjpe[mpjpe_top1_index]
+    input_accel_top1=input_accel[mpjpe_top1_index]
+    denoise_mpjpe_top1=denoise_mpjpe[mpjpe_top1_index]
+    denoise_accel_top1=denoise_accel[mpjpe_top1_index]
 
     m2mm = 1000
 
@@ -582,10 +582,10 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
                 "filter_accel":filter_accel.mean()*m2mm,
                 "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
                 "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
-                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
-                "input_accel_top10":input_accel_top10.mean()*m2mm,
-                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
-                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
+                "input_mpjpe_top1":input_mpjpe_top1.mean()*m2mm,
+                "input_accel_top1":input_accel_top1.mean()*m2mm,
+                "denoise_mpjpe_top1":denoise_mpjpe_top1.mean()*m2mm,
+                "denoise_accel_top1":denoise_accel_top1.mean()*m2mm,
             }
     else:
          eval_dict = {
@@ -600,10 +600,10 @@ def evaluate_smoothnet_3D(model, test_dataloader, device, dataset_name,estimator
                 "output_accel": denoise_accel.mean() * m2mm,
                 "improvement_accel": denoise_accel.mean() * m2mm - input_accel.mean() * m2mm,
                 "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
-                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
-                "input_accel_top10":input_accel_top10.mean()*m2mm,
-                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
-                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
+                "input_mpjpe_top1":input_mpjpe_top1.mean()*m2mm,
+                "input_accel_top1":input_accel_top1.mean()*m2mm,
+                "denoise_mpjpe_top1":denoise_mpjpe_top1.mean()*m2mm,
+                "denoise_accel_top1":denoise_accel_top1.mean()*m2mm,
             }
         
         
@@ -808,13 +808,13 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
 
     m2mm = 1000
 
-    _,mpjpe_top10_index=torch.sort(input_mpjpe)
-    mpjpe_top10_index=mpjpe_top10_index[int(len(mpjpe_top10_index)*0.9):]
+    _,mpjpe_top1_index=torch.sort(input_mpjpe)
+    mpjpe_top1_index=mpjpe_top1_index[int(len(mpjpe_top1_index)*0.99):]
 
-    input_mpjpe_top10=input_mpjpe[mpjpe_top10_index]
-    input_accel_top10=input_accel[mpjpe_top10_index]
-    denoise_mpjpe_top10=denoise_mpjpe[mpjpe_top10_index]
-    denoise_accel_top10=denoise_accel[mpjpe_top10_index]
+    input_mpjpe_top1=input_mpjpe[mpjpe_top1_index]
+    input_accel_top1=input_accel[mpjpe_top1_index]
+    denoise_mpjpe_top1=denoise_mpjpe[mpjpe_top1_index]
+    denoise_accel_top1=denoise_accel[mpjpe_top1_index]
 
     if cfg.EVALUATE.TRADITION !="":
         eval_dict = {
@@ -837,10 +837,10 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 "filter_mpvpe":filter_mpvpe.mean()*m2mm,
                 "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
                 "filter_inference_time":10e6*inference_time["filter"]/input_mpjpe.shape[0],
-                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
-                "input_accel_top10":input_accel_top10.mean()*m2mm,
-                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
-                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
+                "input_mpjpe_top1":input_mpjpe_top1.mean()*m2mm,
+                "input_accel_top1":input_accel_top1.mean()*m2mm,
+                "denoise_mpjpe_top1":denoise_mpjpe_top1.mean()*m2mm,
+                "denoise_accel_top1":denoise_accel_top1.mean()*m2mm,
             }
     else:
         eval_dict = {
@@ -858,10 +858,10 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 "output_mpvpe": denoise_mpvpe.mean() * m2mm,
                 "improvement_mpvpe": denoise_mpvpe.mean() * m2mm - input_mpvpe.mean() * m2mm,
                 "smoothnet_inference_time":10e6*inference_time["smoothnet"]/input_mpjpe.shape[0],
-                "input_mpjpe_top10":input_mpjpe_top10.mean()*m2mm,
-                "input_accel_top10":input_accel_top10.mean()*m2mm,
-                "denoise_mpjpe_top10":denoise_mpjpe_top10.mean()*m2mm,
-                "denoise_accel_top10":denoise_accel_top10.mean()*m2mm,
+                "input_mpjpe_top1":input_mpjpe_top1.mean()*m2mm,
+                "input_accel_top1":input_accel_top1.mean()*m2mm,
+                "denoise_mpjpe_top1":denoise_mpjpe_top1.mean()*m2mm,
+                "denoise_accel_top1":denoise_accel_top1.mean()*m2mm,
             }
 
     return eval_dict
