@@ -221,7 +221,8 @@ def evaluate_smoothnet_2D(model,
             denoised_pos=denoised_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
             data_pred=data_pred.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
             data_gt=data_gt.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
-            filter_pos=filter_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
+            if cfg.EVALUATE.TRADITION !="":
+                filter_pos=filter_pos.reshape(frame_num, -1, 2)*(H36M_IMG_SHAPE/2)+(H36M_IMG_SHAPE/2)
 
             input_mpjpe = torch.cat(
                 (input_mpjpe, calculate_mpjpe(data_pred, data_gt)), dim=0)
