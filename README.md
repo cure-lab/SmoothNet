@@ -29,7 +29,7 @@ To tackle this problem, we propose to attach **a dedicated temporal-only refinem
 
 ## Results
 
-SmoothNet is a plug-and-play post-processing network to smooth any outputs of existing pose estimators. To fit well across datasets, backbones, and modalities with lower MPJPE and PA-MPJPE, we provide **THREE pre-trained models** (Train on [AIST-VIBE-3D](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar), [3DPW-SPIN-3D](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar), and [H36M-FCN-3D](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar)) to handle all existing issues. 
+SmoothNet is a plug-and-play post-processing network to smooth any outputs of existing pose estimators. To fit well across datasets, backbones, and modalities with lower MPJPE and PA-MPJPE, we provide **THREE pre-trained models** (Train on [AIST-VIBE-3D](configs/aist_vibe_3D.yaml), [3DPW-SPIN-3D](configs/pw3d_spin_3D.yaml), and [H36M-FCN-3D](configs/h36m_fcn_3D.yaml)) to handle all existing issues. 
 
 Please refer to our supplementary materials to check the cross-model validation in detail. Noted that all models can obtain **lower and similar Accels** than the compared backbone estimators. The differences are in MPJPEs and PA-MPJPEs.
 
@@ -39,37 +39,37 @@ Please refer to our supplementary materials to check the cross-model validation 
 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
-| AIST++    | SPIN      | 107.17/95.21            | 33.19/4.17           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| AIST++   | TCMR*       | 106.72/105.51            | 6.4/4.24           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
-| AIST++    | VIBE*       | 106.90/97.47            | 31.64/4.15          | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml)|
-| Human3.6M    | FCN       |  54.55/52.72        | 19.17/1.03       |   [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | RLE       |  48.87/48.27              | 7.75/0.90          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | TCMR*       |  73.57/73.89              | 3.77/2.79          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | VIBE*       |  78.10/77.23              | 15.81/2.86          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=27)*       |  50.13/50.04             | 3.53/0.88          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=81)*       |  48.97/48.89             | 3.06/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M    | Videopose(T=243)*       |  48.11/48.05             | 2.82/0.87          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| MPI-INF-3DHP    | SPIN       |  100.74/92.89             | 28.54/6.54          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MPI-INF-3DHP    | TCMR*       |  92.83/88.93             | 7.92/6.49          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MPI-INF-3DHP    | VIBE*       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| MuPoTS    | TposeNet*      | 103.33/100.78            | 12.7/7.23           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| MuPoTS    | TposeNet+RefineNet*      | 93.97/91.78            | 9.53/7.21           | [checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| 3DPW    | EFT       |  90.32/88.40             | 32.71/6.07          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | EFT       |  90.32/86.39             | 32.71/6.30          |  [checkpoint](data/checkpoints/pw3d_eft_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)(additional training)|
-| 3DPW    | PARE      |  78.91/78.11             | 25.64/5.91          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | SPIN      |  96.85/95.84             | 34.55/6.17          |  [checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW    | TCMR*      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW    | VIBE*      |  82.97/81.49             | 23.16/5.98          | [checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++    | SPIN      | 107.17/95.21            | 33.19/4.17           | [checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml) |
+| AIST++   | TCMR*       | 106.72/105.51            | 6.4/4.24           | [checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml)|
+| AIST++    | VIBE*       | 106.90/97.47            | 31.64/4.15          | [checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml)|
+| Human3.6M    | FCN       |  54.55/52.72        | 19.17/1.03       |   [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | RLE       |  48.87/48.27              | 7.75/0.90          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | TCMR*       |  73.57/73.89              | 3.77/2.79          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | VIBE*       |  78.10/77.23              | 15.81/2.86          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=27)*       |  50.13/50.04             | 3.53/0.88          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=81)*       |  48.97/48.89             | 3.06/0.87          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M    | Videopose(T=243)*       |  48.11/48.05             | 2.82/0.87          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| MPI-INF-3DHP    | SPIN       |  100.74/92.89             | 28.54/6.54          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| MPI-INF-3DHP    | TCMR*       |  92.83/88.93             | 7.92/6.49          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| MPI-INF-3DHP    | VIBE*       |  92.39/87.57             | 22.37/6.5          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| MuPoTS    | TposeNet*      | 103.33/100.78            | 12.7/7.23           | [checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml) |
+| MuPoTS    | TposeNet+RefineNet*      | 93.97/91.78            | 9.53/7.21           | [checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml) |
+| 3DPW    | EFT       |  90.32/88.40             | 32.71/6.07          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | EFT       |  90.32/86.39             | 32.71/6.30          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)(additional training)|
+| 3DPW    | PARE      |  78.91/78.11             | 25.64/5.91          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | SPIN      |  96.85/95.84             | 34.55/6.17          |  [checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW    | TCMR*      |  86.46/86.48             | 6.76/5.95          |  [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW    | VIBE*      |  82.97/81.49             | 23.16/5.98          | [checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
 
 ### 2D Keypoint Results
 
 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
-| Human3.6M   | CPN      | 6.67/6.45            | 2.91/0.14           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M   | Hourglass      | 9.42/9.25            | 1.54/0.15           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M   | HRNet      | 4.59/4.54            | 1.01/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| Human3.6M   | RLE      | 5.14/5.11            | 0.9/0.13           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | CPN      | 6.67/6.45            | 2.91/0.14           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | Hourglass      | 9.42/9.25            | 1.54/0.15           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | HRNet      | 4.59/4.54            | 1.01/0.13           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| Human3.6M   | RLE      | 5.14/5.11            | 0.9/0.13           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
 
 
 ### SMPL Results
@@ -77,14 +77,14 @@ Please refer to our supplementary materials to check the cross-model validation 
 
 | Dataset | Estimator | MPJPE (Input/Output):arrow_down: | Accel (Input/Output):arrow_down: | Pretrain model |
 | ------- | --------- | ------------------ | ------------------ | ------------ |
-| AIST++   | SPIN      | 107.72/103.00            | 33.21/5.72           |[checkpoint](data/checkpoints/aist_vibe_3D/checkpoint_32.pth.tar) / [config](configs/aist_vibe_3D.yaml) |
-| AIST++   | TCMR*      | 106.95/106.39            | 6.47/4.68           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| AIST++   | VIBE*      | 107.41/102.06            | 31.65/5.95           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW   | EFT      | 91.60/89.57            | 33.38/7.89           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW   | PARE      | 79.93/78.68            | 26.45/6.31           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW   | SPIN      | 99.28/97.81            | 34.95/7.40           |[checkpoint](data/checkpoints/pw3d_spin_3D/checkpoint_32.pth.tar) / [config](configs/pw3d_spin_3D.yaml)|
-| 3DPW   | TCMR*      | 88.46/88.37            | 7.12/6.52           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
-| 3DPW   | VIBE*      | 84.27/83.14            | 23.59/7.24           |[checkpoint](data/checkpoints/h36m_fcn_3D/checkpoint_32.pth.tar) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++   | SPIN      | 107.72/103.00            | 33.21/5.72           |[checkpoint](https://drive.google.com/file/d/101TH_Z8uiXD58d_xkuFTh5bI4NtRm_cK/view?usp=sharing) / [config](configs/aist_vibe_3D.yaml) |
+| AIST++   | TCMR*      | 106.95/106.39            | 6.47/4.68           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| AIST++   | VIBE*      | 107.41/102.06            | 31.65/5.95           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | EFT      | 91.60/89.57            | 33.38/7.89           |[checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | PARE      | 79.93/78.68            | 26.45/6.31           |[checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | SPIN      | 99.28/97.81            | 34.95/7.40           |[checkpoint](https://drive.google.com/file/d/106MnTXFLfMlJ2W7Fvw2vAlsUuQFdUe6k/view?usp=sharing) / [config](configs/pw3d_spin_3D.yaml)|
+| 3DPW   | TCMR*      | 88.46/88.37            | 7.12/6.52           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
+| 3DPW   | VIBE*      | 84.27/83.14            | 23.59/7.24           |[checkpoint](https://drive.google.com/file/d/1ZketGlY4qA3kFp044T1-PaykV2llNUjB/view?usp=sharing) / [config](configs/h36m_fcn_3D.yaml)|
 
 * \* means the used pose estimators are using temporal information. 
 * The usage of SmoothNet for better performance: a SOTA **single-frame** estimator (e.g., PARE) + SmoothNet
