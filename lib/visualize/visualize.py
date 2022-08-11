@@ -8,6 +8,8 @@ from lib.visualize.visualize_smpl import visualize_smpl
 from lib.visualize.visualize_2d import visualize_2d
 import sys
 
+H36M_TO_J17 = [6, 5, 4, 1, 2, 3, 16, 15, 14, 11, 12, 13, 8, 10, 0, 7, 9]
+J17_TO_J14 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
 
 class Visualize():
 
@@ -78,6 +80,12 @@ class Visualize():
 
         data_gt = torch.tensor(data_gt).to(self.device)
         data_pred = torch.tensor(data_pred).to(self.device)
+        
+        if self.estimator in ["eft","spin","pare"]:
+            data_pred=data_pred[:, H36M_TO_J17, :][:, J17_TO_J14, :].contiguous()
+            data_gt=data_gt[:, H36M_TO_J17, :][:, J17_TO_J14, :].contiguous()
+            keypoint_number=data_gt.shape[1]
+            self.input_dimension=keypoint_number*3
 
         data_len = data_pred.shape[0]
         data_pred_window = torch.as_strided(
