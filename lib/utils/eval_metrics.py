@@ -691,8 +691,9 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 -1, 6)).reshape(-1, 24 * 3)
             data_pred_pose = rot6D_to_axis(
                 data_pred_pose.reshape(-1, 6)).reshape(-1, 24 * 3)
-            filter_pos = rot6D_to_axis(
-                filter_pos.reshape(-1, 6)).reshape(-1, 24 * 3)
+            if cfg.EVALUATE.TRADITION !="":
+                filter_pos = rot6D_to_axis(
+                    filter_pos.reshape(-1, 6)).reshape(-1, 24 * 3)
             
 
         with torch.no_grad():
@@ -721,12 +722,13 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 body_pose=denoised_pos[:, 3:].to(torch.float32),
                 betas=data_pred_shape.to(torch.float32),
             )
-
-            filter_smpl_result = smpl.forward(
-                global_orient=filter_pos[:, 0:3].to(torch.float32),
-                body_pose=filter_pos[:, 3:].to(torch.float32),
-                betas=data_pred_shape.to(torch.float32),
-            )
+            
+            if cfg.EVALUATE.TRADITION !="":
+                filter_smpl_result = smpl.forward(
+                    global_orient=filter_pos[:, 0:3].to(torch.float32),
+                    body_pose=filter_pos[:, 3:].to(torch.float32),
+                    betas=data_pred_shape.to(torch.float32),
+                )
 
         input_smpl_result_joints = input_smpl_result.joints[:,
                                                             SMPL_TO_J14, :]
@@ -734,7 +736,8 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
         
         denoise_smpl_result_joints = denoise_smpl_result.joints[:,
                                                             SMPL_TO_J14, :]
-        filter_smpl_result_joints = filter_smpl_result.joints[:,
+        if cfg.EVALUATE.TRADITION !="":
+            filter_smpl_result_joints = filter_smpl_result.joints[:,
                                                             SMPL_TO_J14, :]                                          
         
         if cfg.EVALUATE.ROOT_RELATIVE:
@@ -744,8 +747,9 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
                 axis=1).reshape(-1, 1, 3)
             denoise_smpl_result_joints = denoise_smpl_result_joints - denoise_smpl_result_joints[:, keypoint_root, :].mean(
                 axis=1).reshape(-1, 1, 3)
-            filter_smpl_result_joints = filter_smpl_result_joints - filter_smpl_result_joints[:, keypoint_root, :].mean(
-                axis=1).reshape(-1, 1, 3)
+            if cfg.EVALUATE.TRADITION !="":
+                filter_smpl_result_joints = filter_smpl_result_joints - filter_smpl_result_joints[:, keypoint_root, :].mean(
+                    axis=1).reshape(-1, 1, 3)
 
         input_mpjpe = torch.cat((input_mpjpe,
                                     calculate_mpjpe(input_smpl_result_joints,
