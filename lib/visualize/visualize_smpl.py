@@ -243,7 +243,7 @@ def visualize_smpl_detailed(
     videoWriter = cv2.VideoWriter(
         os.path.join(vis_output_video_path, vis_output_video_name),
         cv2.VideoWriter_fourcc(*'mp4v'), FRAME_RATE,
-        (imgsize_w * 5, imgsize_h + FONT_HEIGHT))
+        (imgsize_w * 3, imgsize_h + FONT_HEIGHT))
 
     if not os.path.exists(vis_output_video_path):
         os.makedirs(vis_output_video_path)
