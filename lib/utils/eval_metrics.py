@@ -680,7 +680,7 @@ def evaluate_smoothnet_smpl(model, test_dataloader, device,cfg,dataset):
             data_gt_scaling=slide_window_to_sequence(data_gt_scaling,cfg.EVALUATE.SLIDE_WINDOW_STEP_SIZE,cfg.MODEL.SLIDE_WINDOW_SIZE)
 
         if cfg.EVALUATE.TRADITION !="":
-            filter_pos,filter_inference_time=filter(data_pred_pose.reshape(-1,24,3))
+            filter_pos,filter_inference_time=filter(data_pred_pose.reshape(-1,24,6))
             inference_time["filter"]+=filter_inference_time
          
         
