@@ -217,6 +217,12 @@ python eval_smoothnet.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/check
 
 Note that the pretrained checkpoints and testing datasets should be downloaded and prepared before evaluation.
 
+The data and checkpoints used in our experiment can be downloaded here. 
+
+[Google Drive](https://drive.google.com/drive/folders/19Cu-_gqylFZAOTmHXzK52C80DKb0Tfx_?usp=sharing)
+
+[Baidu Netdisk](https://pan.baidu.com/s/1J6EV4uwThcn-W_GNuc4ZPw?pwd=eb5x)
+
 ### Visualization
 
 Here, we only provide demo visualization based on offline processed detected poses of specific datasets(e.g. AIST++, Human3.6M, and 3DPW). To visualize on arbitrary given video, please refer to the [inference/demo](https://github.com/open-mmlab/mmhuman3d/blob/main/docs/getting_started.md) of [MMHuman3D](https://github.com/open-mmlab/mmhuman3d).
