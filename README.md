@@ -212,7 +212,7 @@ python eval_smoothnet.py --cfg [config file] --checkpoint [pretrained checkpoint
 For example, you can evaluate `MPI-INF-3DHP` - `TCMR` - `3D` and `MPI-INF-3DHP` - `VIBE` - `3D` using SmoothNet trained on `3DPW` - `SPIN` - `3D` with silde window size 8, and compare the results with traditional filters `oneeuro` by:
 
 ```shell script
-python eval_smoothnet.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw3d_spin_3D/checkpoints_8.pth.tar --dataset_name mpiinf3dhp,mpiinf3dhp --estimator tcmr,vibe --body_representation 3D,3D --slide_window_size 8 --tradition oneeuro
+python eval_smoothnet.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw3d_spin_3D/checkpoint_8.pth.tar --dataset_name mpiinf3dhp,mpiinf3dhp --estimator tcmr,vibe --body_representation 3D,3D --slide_window_size 8 --tradition oneeuro
 ```
 
 Note that the pretrained checkpoints and testing datasets should be downloaded and prepared before evaluation.
@@ -236,7 +236,7 @@ python visualize_smoothnet.py --cfg [config file] --checkpoint [pretrained check
 For example, you can visualize the `second` sequence of `3DPW` - `SPIN` - `3D` using SmoothNet trained on `3DPW` - `SPIN` - `3D` with silde window size 32, and output the video to `./visualize` by:
 
 ```shell script
-python visualize_smoothnet.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw3d_spin_3D/checkpoints_8.pth.tar --dataset_name pw3d --estimator spin --body_representation 3D --slide_window_size 32 --visualize_video_id 2 --output_video_path ./visualize
+python visualize_smoothnet.py --cfg configs/pw3d_spin_3D.yaml --checkpoint data/checkpoints/pw3d_spin_3D/checkpoint_8.pth.tar --dataset_name pw3d --estimator spin --body_representation 3D --slide_window_size 32 --visualize_video_id 2 --output_video_path ./visualize
 ```
 
 ## Citing SmoothNet
